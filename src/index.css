@@ -1,0 +1,16 @@
+.testimonial-swiper {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.testimonial-item .img-thumb img {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+}
+
+.journal-container {
+  height: 100vh;
+  margin-top: 150px;
+}
