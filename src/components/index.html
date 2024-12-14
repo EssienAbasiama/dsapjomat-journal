@@ -1,0 +1,132 @@
+<html>
+<head>
+    <title>Web Page</title>
+    <script src="https://unpkg.com/react/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="root">
+        <div className="container mx-auto p-4">
+            <div className="flex flex-col lg:flex-row justify-between">
+                <div className="w-full lg:w-2/3">
+                    <h2 className="text-xl font-semibold mb-4">Featured this month</h2>
+                    <div className="flex space-x-4">
+                        <div className="relative w-1/2">
+                            <img src="https://placehold.co/600x400" alt="Pregnant woman holding her belly" className="rounded-lg shadow-lg w-full" />
+                            <div className="absolute bottom-0 left-0 p-4 bg-gradient-to-t from-black to-transparent rounded-b-lg w-full">
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">Family Pregnancy</span>
+                                <h3 className="text-white text-lg font-semibold mt-2">Am I Ovulating? How to Spot the Signs</h3>
+                                <div className="flex items-center mt-2">
+                                    <img src="https://placehold.co/32x32" alt="Author" className="w-8 h-8 rounded-full" />
+                                    <div className="ml-2 text-white text-sm">
+                                        <p>John Doe</p>
+                                        <p>May 15, 2021 • 1 min</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="relative w-1/2">
+                            <img src="https://placehold.co/600x400" alt="Nurse's day sign with hearts" className="rounded-lg shadow-lg w-full" />
+                            <div className="absolute bottom-0 left-0 p-4 bg-gradient-to-t from-black to-transparent rounded-b-lg w-full">
+                                <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">News & Experts</span>
+                                <h3 className="text-white text-lg font-semibold mt-2">A Pandemic Nurse's Love Letter to New York</h3>
+                                <div className="flex items-center mt-2">
+                                    <img src="https://placehold.co/32x32" alt="Author" className="w-8 h-8 rounded-full" />
+                                    <div className="ml-2 text-white text-sm">
+                                        <p>John Doe</p>
+                                        <p>June 02, 2020 • 1 min</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="w-full lg:w-1/3 mt-8 lg:mt-0">
+                    <h2 className="text-xl font-semibold mb-4">Recently Published</h2>
+                    <div className="space-y-4">
+                        <div className="bg-white p-4 rounded-lg shadow-lg">
+                            <h3 className="text-gray-800 font-semibold">Am I Ovulating? How to Spot the Signs</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>John Doe</p>
+                                <p>May 15, 2021 • 1 min</p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-lg">
+                            <h3 className="text-gray-800 font-semibold">A Pandemic Nurse's Love Letter to New York</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>John Doe</p>
+                                <p>June 02, 2020 • 1 min</p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-lg">
+                            <h3 className="text-gray-800 font-semibold">19 Tips for Fuller Healthier Hair</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>John Doe</p>
+                                <p>May 16, 2020 • 1 min</p>
+                            </div>
+                        </div>
+                        <div className="bg-white p-4 rounded-lg shadow-lg">
+                            <h3 className="text-gray-800 font-semibold">Common Vitamins & Supplements You Should Take</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>Steve Grant</p>
+                                <p>April 16, 2020 • 1 min</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Top Stories</h2>
+                <div className="space-y-4">
+                    <div className="bg-white p-4 rounded-lg shadow-lg flex">
+                        <img src="https://placehold.co/150x150" alt="Woman with dog" className="w-1/3 rounded-lg" />
+                        <div className="ml-4 w-2/3">
+                            <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">Family Pregnancy</span>
+                            <h3 className="text-gray-800 font-semibold mt-2">Dog Scooting: What It Means and What to Do</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>John Doe</p>
+                                <p>April 16, 2020 • 1 min</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow-lg flex">
+                        <img src="https://placehold.co/150x150" alt="Man with dog" className="w-1/3 rounded-lg" />
+                        <div className="ml-4 w-2/3">
+                            <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">Family Pregnancy</span>
+                            <h3 className="text-gray-800 font-semibold mt-2">16 Foods Your Dog Should Never Eat</h3>
+                            <div className="text-gray-500 text-sm mt-2">
+                                <p>John Doe</p>
+                                <p>April 16, 2020 • 1 min</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Our Sponsor</h2>
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <img src="https://placehold.co/600x400" alt="Sponsor product" className="rounded-lg w-full" />
+                    <p className="text-center text-gray-500 mt-2">ADVERTISE WITH US</p>
+                </div>
+            </div>
+            <div className="mt-8">
+                <h2 className="text-xl font-semibold mb-4">Let's Talk</h2>
+                <div className="bg-white p-4 rounded-lg shadow-lg">
+                    <p className="text-gray-800">Lorem markdownum transiteque nondum. Peiaeque at poterat exegit, urbis quo; tibi. Cursus mecum adit...</p>
+                </div>
+            </div>
+        </div>
+    
+    </div>
+    
+</body>
+</html>

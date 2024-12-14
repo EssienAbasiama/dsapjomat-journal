@@ -11,6 +11,137 @@
 }
 
 .journal-container {
-  height: 100vh;
+  height: max-content;
   margin-top: 150px;
+}
+
+.recentlyPublishedContainer {
+  display: flex;
+  gap: 15px;
+  cursor: pointer;
+}
+
+.recently-published-item {
+  border-radius: 20px;
+  height: 125px;
+  position: relative;
+  border: 1px solid grey;
+  border-left: 5px solid #163bb5;
+}
+.icon-grey {
+  color: grey;
+}
+.recent-published-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-top: 15px;
+}
+.recent-author-name {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.slick-carousel {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.slick-dots {
+  position: absolute;
+  top: 10px;
+  right: 0px;
+  z-index: 10;
+}
+.slick-dots li button:before {
+  color: white;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #007bff;
+}
+.slick-slider {
+  padding: 0px 0 !important;
+}
+.carousel-detail-section {
+  bottom: 0px;
+  color: #fff;
+}
+
+.slick-carousel {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.gradient-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 50%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 2;
+}
+
+.slick-dots {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+}
+
+/* Positioning the carousel navigation icons */
+.carousel-control-prev,
+.carousel-control-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  /* z-index: 10; */
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 10px;
+  cursor: pointer;
+  z-index: 1000;
+}
+
+.slick-prev,
+.slick-next {
+  width: 50px !important;
+  height: 50px !important;
+
+  z-index: 10;
+}
+.slick-prev:before,
+.slick-next:before {
+  content: none !important;
+}
+.carousel-control-prev {
+  left: 10px;
+}
+
+.carousel-control-next {
+  right: 10px;
+}
+
+.carousel-control-prev svg,
+.carousel-control-next svg {
+  color: grey;
+  font-size: 30px;
+}
+.section-header {
+  font-size: 25px;
+}
+.slick-arrow {
+  justify-content: center;
+  display: flex !important;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background: white !important;
+  border-radius: 25px;
 }
