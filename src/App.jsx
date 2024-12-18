@@ -13,6 +13,8 @@ import {
 } from "react-router-dom";
 import Signin from "./components/Pages/Signin";
 import Signup from "./components/Pages/Signup";
+import ContactUs from "./components/Pages/ContactUs";
+import About from "./components/Pages/About";
 
 function App() {
   return (
@@ -29,10 +31,14 @@ function AppWithHeader() {
     <>
       <Header show={isHome} />
       <Routes>
+        {/* Index */}
         <Route path="/" element={<Home />} />
+        {/* Pages */}
         <Route path="/journal" element={<Journal />} />
         <Route path="/login" element={<Signin />} />
         <Route path="/register" element={<Signup />} />
+        <Route path="/contact-us" element={<ContactUs />} />
+        <Route path="/about-us" element={<About />} />
       </Routes>
       <Footer />
     </>

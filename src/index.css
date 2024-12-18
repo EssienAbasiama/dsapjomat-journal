@@ -136,6 +136,10 @@
 .section-header {
   font-size: 25px;
 }
+.section-header-small {
+  font-size: 20px;
+  margin-left: 10px;
+}
 .slick-arrow {
   justify-content: center;
   display: flex !important;
@@ -144,4 +148,12 @@
   height: 50px;
   background: white !important;
   border-radius: 25px;
+}
+
+.testimonial-item .content .description {
+  color: whitesmoke !important;
+}
+
+.description {
+  color: whitesmoke !important;
 }

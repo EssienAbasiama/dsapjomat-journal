@@ -11,7 +11,7 @@ body {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   -webkit-font-smoothing: subpixel-antialiased;
-  color: #abacae;
+  /* color: #abacae; */
   line-height: 25px;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
@@ -1265,3 +1265,5 @@ textarea {
   color: rgb(21 23 26);
   border-color: rgb(21 23 26);
 }
+
+

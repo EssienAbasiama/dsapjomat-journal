@@ -27,7 +27,7 @@ function Hero() {
                   animationDelay: "0.3s",
                 }}
               >
-                <a href="" rel="nofollow" className="btn btn-common">
+                <a href="/journal" rel="nofollow" className="btn btn-common">
                   Start Reading
                 </a>
               </div>

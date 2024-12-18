@@ -18,10 +18,16 @@ import { useInView } from "react-intersection-observer";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import VolumeList from "./VolumeItem";
 
 const Journal = () => {
   const controls = useAnimation();
+  const controls2 = useAnimation();
   const [ref, inView] = useInView({
+    triggerOnce: false, // Animation triggers every time the section comes into view
+    threshold: 0.2, // Adjust the threshold as needed
+  });
+  const [ref2, inView2] = useInView({
     triggerOnce: false, // Animation triggers every time the section comes into view
     threshold: 0.2, // Adjust the threshold as needed
   });
@@ -32,7 +38,12 @@ const Journal = () => {
     } else {
       controls.start("hidden");
     }
-  }, [controls, inView]);
+    if (inView2) {
+      controls2.start("visible");
+    } else {
+      controls2.start("hidden");
+    }
+  }, [controls, inView, controls2, inView2]);
 
   // Animations for the section when it comes in view and out of view
   const sectionVariants = {
@@ -43,9 +54,23 @@ const Journal = () => {
       transition: { duration: 0.5, ease: "easeInOut" },
     },
   };
+  const issueVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.5, ease: "easeInOut" },
+    },
+  };
 
   // Animation for the card hover effect
   const cardHoverVariants = {
+    hover: {
+      scale: 1.05,
+      boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
+    },
+  };
+  const cardIssueHoverVariants = {
     hover: {
       scale: 1.05,
       boxShadow: "0 8px 15px rgba(0, 0, 0, 0.2)",
@@ -149,7 +174,9 @@ const Journal = () => {
     const imageVariants = {
       hover: { scale: 1.05, transition: { duration: 0.5 } },
     };
-
+    const shadowStyle = {
+      boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.3)",
+    };
     const settings = {
       dots: false,
       infinite: true,
@@ -166,6 +193,7 @@ const Journal = () => {
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
+          style={shadowStyle}
         >
           <FaChevronLeft size={30} color="black" />
         </motion.div>
@@ -176,6 +204,7 @@ const Journal = () => {
           variants={buttonVariants}
           whileHover="hover"
           whileTap="tap"
+          style={shadowStyle}
         >
           <FaChevronRight size={30} color="black" />
         </motion.div>
@@ -397,8 +426,111 @@ const Journal = () => {
 
         {/* Publication Info Section */}
         <div className="col-lg-4 mb-4">
-          <h4 className="mb-3 section-header">Publication Information</h4>
+          <h4 className="mb-3 section-header">Journal Archieve</h4>
           <div className="card shadow border-0">
+            <div className="card-body">
+              <VolumeList />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="row">
+        <div className="col-lg-8 mb-4">
+          <h4 className="mb-3 section-header">Current Issues</h4>
+          <motion.div
+            className="row"
+            ref={ref2}
+            variants={issueVariants}
+            initial="hidden"
+            animate={controls2}
+          >
+            {topStories.map((story, index) => (
+              <motion.div className="col-md-12 mb-4" key={index}>
+                <motion.div
+                  className="card d-flex flex-row align-items-center"
+                  style={{
+                    borderRadius: "15px",
+                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                    padding: "5px 10px",
+                    height: "250px",
+                    cursor: "pointer",
+                  }}
+                  whileHover="hover"
+                  variants={cardIssueHoverVariants}
+                >
+                  {/* Text Section */}
+                  <div style={{ flex: 1, padding: "20px" }}>
+                    <div
+                      style={{
+                        display: "inline-block",
+                        padding: "5px 10px",
+                        backgroundColor: "#f0f4f7",
+                        borderRadius: "20px",
+                        fontSize: "12px",
+                        color: "#007BFF",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {story.category}
+                    </div>
+                    <h5
+                      className="card-title"
+                      style={{
+                        fontSize: "18px",
+                        fontWeight: "bold",
+                        marginBottom: "15px",
+                      }}
+                    >
+                      {story.title}
+                    </h5>
+                    <p
+                      className="card-text"
+                      style={{
+                        fontSize: "14px",
+                        color: "#555",
+                        marginBottom: "10px",
+                      }}
+                    >
+                      {story.description}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: "13px",
+                        color: "#888",
+                      }}
+                    >
+                      <img
+                        src={story.authorImage}
+                        alt={story.author}
+                        style={{
+                          width: "50px",
+                          height: "50px",
+                          borderRadius: "50%",
+                          marginRight: "10px",
+                        }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: "700" }}>{story.author}</div>
+                        <span>{story.date}</span>
+                        <span> • {story.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+        <div
+          className="col-lg-4 mb-4"
+          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+        >
+          <div className="card shadow border-0">
+            <h4 className="mt-3 section-header-small">
+              Publication Information
+            </h4>
             <div className="card-body">
               <ul className="">
                 <li
@@ -514,9 +646,14 @@ const Journal = () => {
               </ul>
             </div>
           </div>
+          {/* <div className="card shadow border-0 mb-8">
+            <h4 className="mb-3 section-header">Fact & Figures</h4>
+            <div className="card-body"></div>
+          </div> */}
         </div>
       </div>
     </div>
+    // </div>
   );
 };
 

@@ -26,7 +26,7 @@ const Footer = () => {
                   style={{ width: "80px", height: "80px" }}
                 />
               </div>
-              <p>
+              <p className="description">
                 Advancing Knowledge Through Educative, Informative, and
                 Technological Solutions to Global Challenges.
               </p>
