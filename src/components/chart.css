@@ -1,0 +1,19 @@
+.custom-tooltip {
+  position: relative;
+  background-color: black;
+  padding: 5px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.arrow-down {
+  position: absolute;
+  top: calc(100% - 1px); /* Adjusted the top property */
+  left: 50%;
+  margin-left: -5px; /* Half of the arrow width */
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid black;
+}

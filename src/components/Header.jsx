@@ -3,28 +3,31 @@ import { motion, AnimatePresence } from "framer-motion";
 import Hero from "./Hero";
 
 function Header({ show }) {
-  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  // State to manage active dropdown
+  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  // Ref for the dropdown and its trigger
-  const dropdownRef = useRef(null);
+  // Refs for the dropdowns
+  const dropdownRefs = [useRef(null), useRef(null)];
 
-  // Toggle dropdown visibility
-  const toggleDropdown = () => {
-    setIsDropdownVisible((prev) => !prev);
+  // Toggle dropdown
+  const toggleDropdown = (index) => {
+    setActiveDropdown((prev) => (prev === index ? null : index));
   };
 
   // Close dropdown when clicking outside
   const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsDropdownVisible(false);
+    if (
+      dropdownRefs.every(
+        (ref) => ref.current && !ref.current.contains(event.target)
+      )
+    ) {
+      setActiveDropdown(null);
     }
   };
 
   useEffect(() => {
-    // Add event listener
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      // Cleanup event listener on component unmount
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
@@ -78,21 +81,27 @@ function Header({ show }) {
                       Contact
                     </a>
                   </li>
+                  <li className="nav-item">
+                    <a className="page-scroll" href="/author">
+                      Submit Manuscript
+                    </a>
+                  </li>
 
-                  {/* Journal Info with Dropdown */}
-                  <li className="nav-item dropdown" ref={dropdownRef}>
+                  {/* First Dropdown */}
+                  <li
+                    className="nav-item dropdown"
+                    ref={dropdownRefs[0]}
+                    style={{ position: "relative" }}
+                  >
                     <a
                       className="page-scroll dropdown-toggle"
-                      href="#"
-                      onClick={toggleDropdown}
+                      onClick={() => toggleDropdown(0)}
                       style={{ cursor: "pointer" }}
                     >
                       Journal Info
                     </a>
-
-                    {/* Dropdown Menu with Framer Motion */}
                     <AnimatePresence>
-                      {isDropdownVisible && (
+                      {activeDropdown === 0 && (
                         <motion.ul
                           className="dropdown-menu show"
                           initial={{ opacity: 0, y: -10 }}
@@ -108,19 +117,67 @@ function Header({ show }) {
                             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                           }}
                         >
-                          {/* <li>
-                            <a className="dropdown-item" href="/general-info">
-                              General Information
-                            </a>
-                          </li> */}
                           <li>
-                            <a className="dropdown-item" href="/journal-policy">
+                            <a
+                              className="dropdown-item"
+                              href="/editorial-board"
+                            >
                               EDITORIAL BOARD
                             </a>
                           </li>
                           <li>
                             <a className="dropdown-item" href="/terms">
                               NEWS
+                            </a>
+                          </li>
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
+                  </li>
+
+                  {/* Second Dropdown */}
+                  <li
+                    className="nav-item dropdown"
+                    ref={dropdownRefs[1]}
+                    style={{ position: "relative" }}
+                  >
+                    <a
+                      className="page-scroll dropdown-toggle"
+                      onClick={() => toggleDropdown(1)}
+                      style={{ cursor: "pointer" }}
+                    >
+                      Publications
+                    </a>
+                    <AnimatePresence>
+                      {activeDropdown === 1 && (
+                        <motion.ul
+                          className="dropdown-menu show"
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          style={{
+                            position: "absolute",
+                            background: "white",
+                            listStyle: "none",
+                            padding: "10px",
+                            borderRadius: "5px",
+                            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+                          }}
+                        >
+                          <li>
+                            <a className="dropdown-item" href="/general-info">
+                              Engineering and Technology
+                            </a>
+                          </li>
+                          <li>
+                            <a className="dropdown-item" href="/journal-policy">
+                              Applied Science
+                            </a>
+                          </li>
+                          <li>
+                            <a className="dropdown-item" href="/terms">
+                              Social Science
                             </a>
                           </li>
                         </motion.ul>

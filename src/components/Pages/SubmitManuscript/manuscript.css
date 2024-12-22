@@ -1,0 +1,134 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,500;0,600;0,700;0,800;1,300;1,400;1,500;1,700;1,800&display=swap");
+
+.page-container {
+  display: flex;
+}
+.body {
+  margin-left: 5%;
+  width: 95%;
+  background: #fafafa;
+  height: max-content;
+  padding-bottom: 20px;
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: white;
+}
+
+.header-title {
+  font-size: 18px;
+  font-weight: 500;
+  margin-left: 16px;
+}
+
+.header-title2 {
+  font-size: 18px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.drawer-content {
+  display: flex;
+  flex-direction: row;
+  padding: 0px 50px 0px 50px;
+  overflow-y: auto;
+}
+
+.name {
+  text-transform: capitalize;
+}
+
+.steps-card {
+  flex: 0 0 25%;
+  margin-right: 16px;
+  height: auto;
+}
+
+.form-card {
+  flex: 1;
+  height: fit-content;
+}
+
+.drawer-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 50px 30px 50px;
+  margin-bottom: 50px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.drawer-footer .ant-btn-link {
+  display: flex;
+  align-items: center;
+}
+
+.drawer-footer .ant-btn-link .anticon {
+  margin-right: 8px;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-item-half {
+  width: 48%;
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.form-item-half {
+  flex: 0 0 48%;
+}
+
+.card-container {
+  background: white;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+.job-description ul {
+  list-style-type: disc !important;
+  padding-left: 30px;
+}
+
+.job-description ul li {
+  list-style: initial !important;
+}
+.job-description ol li {
+  list-style: decimal !important;
+}
+.job-description ol {
+  list-style-type: decimal !important;
+  padding-left: 30px;
+}
+.ant-input-prefix {
+  width: 100%;
+}
+@media (max-width: 768px) {
+  .drawer-content {
+    flex-direction: column;
+  }
+
+  .steps-card {
+    flex: none;
+    margin-right: 0;
+    margin-bottom: 16px;
+  }
+
+  .form-item-half {
+    width: 100%;
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+}

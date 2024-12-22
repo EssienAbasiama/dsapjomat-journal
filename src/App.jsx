@@ -3,7 +3,7 @@ import "./App.css";
 import Footer from "./components/Footer";
 import Header from "./components/Header";
 import Home from "./components/Home";
-import Journal from "./components/Journal";
+import Journal from "./components/Pages/Journal";
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,6 +15,7 @@ import Signin from "./components/Pages/Signin";
 import Signup from "./components/Pages/Signup";
 import ContactUs from "./components/Pages/ContactUs";
 import About from "./components/Pages/About";
+import SubmitManuscript from "./components/Pages/SubmitManuscript/SubmitManuscript";
 
 function App() {
   return (
@@ -25,11 +26,12 @@ function App() {
 }
 function AppWithHeader() {
   const location = useLocation();
+  const isExcludedRoute = location.pathname === "/author"; // Add more paths if needed
   const isHome = location.pathname === "/";
 
   return (
     <>
-      <Header show={isHome} />
+      {!isExcludedRoute && <Header show={isHome} />}
       <Routes>
         {/* Index */}
         <Route path="/" element={<Home />} />
@@ -39,8 +41,10 @@ function AppWithHeader() {
         <Route path="/register" element={<Signup />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/about-us" element={<About />} />
+        <Route path="/editorial-board" element={<About />} />
+        <Route path="/author" element={<SubmitManuscript />} />
       </Routes>
-      <Footer />
+      {!isExcludedRoute && <Footer />}
     </>
   );
 }

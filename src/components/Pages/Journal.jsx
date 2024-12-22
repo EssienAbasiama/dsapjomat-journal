@@ -18,7 +18,7 @@ import { useInView } from "react-intersection-observer";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import VolumeList from "./VolumeItem";
+import VolumeList from "../VolumeItem";
 
 const Journal = () => {
   const controls = useAnimation();
