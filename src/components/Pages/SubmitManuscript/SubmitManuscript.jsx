@@ -20,12 +20,15 @@ import {
   Row,
   Col,
   Modal,
+  Table,
   Alert,
   Checkbox,
+  Divider,
+  Typography,
   Tag,
   Tooltip,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, InboxOutlined } from "@ant-design/icons";
 import ReactQuill from "react-quill";
 import moment from "moment";
 import "react-quill/dist/quill.snow.css";
@@ -205,7 +208,62 @@ function SubmitManuscript() {
       message.error("Error: Failed to add department");
     }
   };
+  const manuscriptData = [
+    {
+      key: "1",
+      field: "Manuscript ID",
+      value: "dfvd",
+    },
+    {
+      key: "2",
+      field: "Manuscript Title",
+      value: "Research Paper",
+    },
+    {
+      key: "3",
+      field: "Main Subjects",
+      value: "Biochemical engineering / Biomaterials",
+    },
+    {
+      key: "4",
+      field: "Abstract",
+      value:
+        "Insert abstract text here with long content as shown in the screenshots.",
+    },
+    {
+      key: "5",
+      field: "Keywords",
+      value: "Insert keywords here.",
+    },
+  ];
 
+  const authorsData = [
+    {
+      key: "1",
+      name: "Essien, Abasiama",
+      email: "essienabasiama11@gmail.com",
+      degree: "BSc",
+      position: "Professor",
+      phone: "09036894661",
+      country: "Nigeria",
+      affiliation: "Add Affiliation Here",
+    },
+  ];
+
+  const filesData = [
+    {
+      key: "1",
+      fileType: "Manuscript Main File",
+      fileName: "Module 1.docx",
+      size: "24.29 KB",
+    },
+    {
+      key: "2",
+      fileType: "Title Page",
+      fileName: "Editor_030943.docx",
+      size: "12.26 KB",
+    },
+  ];
   const handleSubmit = async () => {
     setSending(true);
     try {
@@ -1099,32 +1157,79 @@ These comments will not appear in your manuscript."
           <Alert
             message="Authors information should not be placed in Manuscript Main File. Upload authors information via Title Page."
             showIcon
+            type="warning"
             style={{ margin: "16px 0" }}
           />
 
           <Form
             layout="vertical"
             form={form}
+            onFinish={handleSubmit}
             style={{ background: "#fff", padding: "20px", borderRadius: "8px" }}
           >
-            {/* Form Item */}
+            {/* File Type Dropdown */}
             <Form.Item
-              label="Select manuscript type"
-              name="manuscript_type"
-              rules={[
-                { required: true, message: "Manuscript type is required" },
-              ]}
+              label="Select File Type"
+              name="file_type"
+              rules={[{ required: true, message: "File type is required" }]}
             >
-              <Select
-                placeholder="Select manuscript type"
-                style={{ height: "50px" }}
-              >
-                <Select.Option value="research">Research Paper</Select.Option>
-                <Select.Option value="review">Review Article</Select.Option>
+              <Select placeholder="Select file type" style={{ height: "50px" }}>
+                <Select.Option value="pdf">PDF</Select.Option>
+                <Select.Option value="doc">Word Document</Select.Option>
+                <Select.Option value="ppt">PowerPoint</Select.Option>
               </Select>
             </Form.Item>
 
-            {/* Next Button */}
+            {/* File Description (ReactQuill) */}
+            <Form.Item
+              label="File Description"
+              name="file_description"
+              rules={[
+                { required: true, message: "File description is required" },
+              ]}
+            >
+              <ReactQuill
+                theme="snow"
+                placeholder="Write a description for the file..."
+              />
+            </Form.Item>
+
+            {/* Drag and Drop for Multiple Files */}
+            <Form.Item
+              label="Upload Files"
+              name="files"
+              rules={[
+                { required: true, message: "Please upload at least one file" },
+              ]}
+            >
+              <Upload.Dragger
+                name="files"
+                multiple
+                beforeUpload={() => false} // Prevent auto-upload for custom handling
+                onChange={(info) => {
+                  const { status } = info.file;
+                  if (status === "done") {
+                    message.success(
+                      `${info.file.name} file uploaded successfully.`
+                    );
+                  } else if (status === "error") {
+                    message.error(`${info.file.name} file upload failed.`);
+                  }
+                }}
+              >
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">
+                  Click or drag files to this area to upload
+                </p>
+                <p className="ant-upload-hint">
+                  You can upload multiple files simultaneously.
+                </p>
+              </Upload.Dragger>
+            </Form.Item>
+
+            {/* Submit Button */}
             <Form.Item>
               <Button
                 type="primary"
@@ -1135,7 +1240,7 @@ These comments will not appear in your manuscript."
                   background: "rgb(22, 59, 181)",
                 }}
               >
-                Next
+                Submit
               </Button>
             </Form.Item>
           </Form>
@@ -1145,121 +1250,208 @@ These comments will not appear in your manuscript."
     {
       title: "Cover Letter and Checklist",
       content: (
-        <Form layout="vertical" form={form}>
-          <div className="form-row">
+        <div style={{ padding: "20px", maxWidth: "600px", margin: "auto" }}>
+          {/* Section Header */}
+          <h3
+            style={{ borderBottom: "1px solid #d9d9d9", paddingBottom: "8px" }}
+          >
+            Enter Enter the additional comments on your submission
+          </h3>
+
+          {/* Info Box */}
+
+          <Alert
+            message={
+              <div>
+                <p style={{ marginBottom: "8px", fontWeight: "bold" }}>
+                  Dear Add Name of Editor-in-Chief or Section Editor
+                </p>
+                <p>Editor-in-Chief or Section Editor</p>
+                <p>
+                  Add a brief note about the manuscript. Note should not be more
+                  than 5 lines. For example:
+                </p>
+                <p>
+                  Particles attrition is a complex phenomenon which widely
+                  occurs in many industrial processes. This paper presents an
+                  algorithm for CFD-DEM modelling of attrition in fluidized
+                  beds, aiming to give first applicable method to predict
+                  particle breakage in fluidized beds. An improved CFD-DEM model
+                  for simulation of particles attrition is presented in a
+                  jet-in-fluidized bed.
+                </p>
+                <p>
+                  The presented manuscript is original and unpublished and is
+                  not being considered for publication elsewhere. Attached
+                  please find the manuscript entitled "Manuscript Title"
+                  prepared by Add Name of all Authors, to be considered for
+                  possible publication in Journal of Chemical and Petroleum
+                  Engineering (JChPE).
+                </p>
+                <p>
+                  Regards, <br />
+                  Name of Corresponding Author, <br />
+                  Title of Corresponding Author, <br />
+                  Affiliation, <br />
+                  P.O. Box: ..., <br />
+                  Name of City, Name of Country, <br />
+                  Tel.: and Fax: ..., <br />
+                  Email:
+                </p>
+              </div>
+            }
+            type="info"
+            showIcon
+            style={{ margin: "16px 0" }}
+          />
+
+          <Form
+            layout="vertical"
+            form={form}
+            onFinish={handleSubmit}
+            style={{ marginTop: "16px" }}
+          >
+            {/* ReactQuill Editor */}
             <Form.Item
-              label="Hiring Manager"
-              name="hring_manager"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
+              label="Cover Letter"
+              name="cover_letter"
+              rules={[{ required: true, message: "Cover letter is required" }]}
             >
-              <Input
-                placeholder="Enter Hiring Manager"
-                value={formData.hiring_manager}
-                onChange={(e) => onChange(e.target.value, "hiring_manager")}
+              <ReactQuill
+                theme="snow"
+                placeholder="Write your cover letter here..."
+                style={{ minHeight: "200px" }}
               />
             </Form.Item>
-            <Form.Item
-              label="Number of openings"
-              name="no_openings"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <Input
-                placeholder="Enter number of openings"
-                onKeyPress={handleKeyPress}
-                value={formData.no_openings}
-                onChange={(e) => onChange(e.target.value, "no_openings")}
-              />
+
+            {/* Submit Button */}
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                style={{
+                  width: "100%",
+                  height: "45px",
+                  background: "rgb(22, 59, 181)",
+                }}
+              >
+                Submit
+              </Button>
             </Form.Item>
-          </div>
-          <div className="form-row">
-            <Form.Item
-              label="Opening date"
-              name="opening_date"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <DatePicker
-                placeholder="Select Opening date"
-                style={{ width: "100%" }}
-                onChange={onChangeOpeningDate}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Expiry date"
-              name="expiring_date"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <DatePicker
-                placeholder="Select Expiry date"
-                style={{ width: "100%" }}
-                onChange={onChangeExpiringDate}
-              />
-            </Form.Item>
-          </div>
-        </Form>
+          </Form>
+        </div>
       ),
     },
     {
       title: "Finish Submission",
       content: (
-        <Form layout="vertical" form={form}>
-          <div className="form-row">
-            <Form.Item
-              label="Hiring Manager"
-              name="hring_manager"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <Input
-                placeholder="Enter Hiring Manager"
-                value={formData.hiring_manager}
-                onChange={(e) => onChange(e.target.value, "hiring_manager")}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Number of openings"
-              name="no_openings"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <Input
-                placeholder="Enter number of openings"
-                onKeyPress={handleKeyPress}
-                value={formData.no_openings}
-                onChange={(e) => onChange(e.target.value, "no_openings")}
-              />
-            </Form.Item>
-          </div>
-          <div className="form-row">
-            <Form.Item
-              label="Opening date"
-              name="opening_date"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <DatePicker
-                placeholder="Select Opening date"
-                style={{ width: "100%" }}
-                onChange={onChangeOpeningDate}
-              />
-            </Form.Item>
-            <Form.Item
-              label="Expiry date"
-              name="expiring_date"
-              className="form-item-half"
-              rules={[{ required: true, message: "" }]}
-            >
-              <DatePicker
-                placeholder="Select Expiry date"
-                style={{ width: "100%" }}
-                onChange={onChangeExpiringDate}
-              />
-            </Form.Item>
-          </div>
-        </Form>
+        <div>
+          <Alert
+            message="You cannot finish your submission until completing the: At least 5 suggested reviewers; Attach Files (Cover Letter)"
+            type="error"
+            showIcon
+            style={{ marginBottom: "16px" }}
+          />
+
+          <Card title="Your Submission Summary">
+            <Typography.Title level={5}>
+              Manuscript Information
+            </Typography.Title>
+            <Table
+              dataSource={manuscriptData}
+              columns={[
+                {
+                  title: "Field",
+                  dataIndex: "field",
+                  key: "field",
+                  width: "30%",
+                },
+                {
+                  title: "Value",
+                  dataIndex: "value",
+                  key: "value",
+                },
+              ]}
+              pagination={false}
+              bordered
+              size="small"
+            />
+
+            <Divider />
+
+            <Typography.Title level={5}>Authors</Typography.Title>
+            <Table
+              dataSource={authorsData}
+              columns={[
+                {
+                  title: "Name",
+                  dataIndex: "name",
+                  key: "name",
+                },
+                {
+                  title: "Email Address",
+                  dataIndex: "email",
+                  key: "email",
+                },
+                {
+                  title: "Degree",
+                  dataIndex: "degree",
+                  key: "degree",
+                },
+                {
+                  title: "Position",
+                  dataIndex: "position",
+                  key: "position",
+                },
+                {
+                  title: "Phone",
+                  dataIndex: "phone",
+                  key: "phone",
+                },
+                {
+                  title: "Country",
+                  dataIndex: "country",
+                  key: "country",
+                },
+                {
+                  title: "Affiliation",
+                  dataIndex: "affiliation",
+                  key: "affiliation",
+                },
+              ]}
+              pagination={false}
+              bordered
+              size="small"
+            />
+
+            <Divider />
+
+            <Typography.Title level={5}>Files</Typography.Title>
+            <Table
+              dataSource={filesData}
+              columns={[
+                {
+                  title: "File Type",
+                  dataIndex: "fileType",
+                  key: "fileType",
+                },
+                {
+                  title: "File Name",
+                  dataIndex: "fileName",
+                  key: "fileName",
+                },
+                {
+                  title: "Size",
+                  dataIndex: "size",
+                  key: "size",
+                },
+              ]}
+              pagination={false}
+              bordered
+              size="small"
+            />
+          </Card>
+        </div>
       ),
     },
   ];
@@ -1285,11 +1477,16 @@ These comments will not appear in your manuscript."
       message.error("Failed to save draft");
     }
   };
-
+  const [activeItemId, setActiveItemId] = useState('1');
   return (
     <>
       <div className="page-container">
-        <SideBar darkModeTheme={darkMode} toggleDarkMode={toggleDarkMode} />
+        <SideBar
+          darkModeTheme={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          activeItemId={activeItemId}
+          setActiveItemId={setActiveItemId}
+        />
         <div className={`body ${darkMode ? "dark-mode" : "light-mode"}`}>
           <JournalHeader darkModeTheme={darkMode} />
           <div
@@ -1433,7 +1630,11 @@ These comments will not appear in your manuscript."
               </Modal>
             </Drawer>
           </div>
-          <MainBody darkModeTheme={darkMode} />
+          <MainBody
+            darkModeTheme={darkMode}
+            activeItemId={activeItemId}
+            setActiveItemId={setActiveItemId}
+          />
         </div>
       </div>
     </>
