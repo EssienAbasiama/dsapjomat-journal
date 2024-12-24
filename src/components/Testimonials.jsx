@@ -5,6 +5,9 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination } from "swiper/modules";
+import image1 from "/src/assets/img1.jpg";
+import image2 from "/src/assets/img2.jpg";
+import image3 from "/src/assets/img3.jpg";
 
 const Testimonial = () => {
   const testimonials = [
@@ -12,7 +15,7 @@ const Testimonial = () => {
       id: 1,
       description:
         "Holisticly empower leveraged ROI whereas effective web-readiness. Completely enable emerging meta-services with cross-platform web services.",
-      imgSrc: "/src/assets/img1.jpg",
+      imgSrc: image1,
       name: "Grenchen Pearce",
       company: "Boston Brothers co.",
     },
@@ -20,7 +23,7 @@ const Testimonial = () => {
       id: 2,
       description:
         "Quickly initiate inexpensive total linkage rather than extensible scenarios. Holisticly empower leveraged ROI whereas effective web-readiness.",
-      imgSrc: "/src/assets/img2.jpg",
+      imgSrc: { image2 },
       name: "Domeni Gesson",
       company: "Awesome Technology co.",
     },
@@ -28,7 +31,7 @@ const Testimonial = () => {
       id: 3,
       description:
         "Completely enable emerging meta-services with cross-platform web services. Quickly initiate inexpensive total linkage rather than extensible scenarios.",
-      imgSrc: "/src/assets/img3.jpg",
+      imgSrc: { image3 },
       name: "Dommini Albert",
       company: "Nesnal Design co.",
     },

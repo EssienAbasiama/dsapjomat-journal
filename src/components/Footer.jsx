@@ -8,6 +8,7 @@ import {
 } from "react-icons/fa";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUp } from "@fortawesome/free-solid-svg-icons";
+import logo from "/src/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -21,7 +22,7 @@ const Footer = () => {
             >
               <div className="footer-logo mb-3">
                 <img
-                  src="/src/assets/logo.png"
+                  src={logo}
                   alt="Logo"
                   style={{ width: "80px", height: "80px" }}
                 />
