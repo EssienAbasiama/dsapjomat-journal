@@ -4,8 +4,6 @@ import React from "react";
 import { FaMapMarkerAlt, FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 
 import Testimonial from "./Testimonials";
-import Footer from "./Footer";
-import Header from "./Header";
 
 function Home() {
   return (

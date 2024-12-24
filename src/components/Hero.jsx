@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React from "react";
+import hero from "/src/assets/hero.svg";
 
 function Hero() {
   return (
@@ -42,7 +43,7 @@ function Hero() {
                 animationDelay: "0.6s",
               }}
             >
-              <img className="img-fluid" src="/src/assets/hero.svg" alt="" />
+              <img className="img-fluid" src={hero} alt="" />
             </div>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Hero from "./Hero";
+import logo from "/src/assets/logo.png";
 
 function Header({ show }) {
   // State to manage active dropdown
@@ -40,7 +41,7 @@ function Header({ show }) {
             <nav className="navbar navbar-expand-lg">
               <a className="navbar-brand" href="/">
                 <img
-                  src="/src/assets/logo.png"
+                  src={logo}
                   alt="Logo"
                   style={{ width: "50px", height: "50px" }}
                 />
