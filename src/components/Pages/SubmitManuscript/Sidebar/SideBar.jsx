@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import "./SideBar.css";
 import { Tooltip } from "react-tooltip";
+import logo from "/src/assets/logo.png";
 
 const svgData = [
   {
@@ -242,7 +243,7 @@ const SideBar = ({
         <div>
           <a className="navbar-brand" href="/">
             <img
-              src="/src/assets/logo.png"
+              src={logo}
               alt="Logo"
               style={{ width: "50px", height: "50px" }}
             />
