@@ -83,8 +83,8 @@ function Header({ show }) {
                     </a>
                   </li>
                   <li className="nav-item">
-                    <a className="page-scroll" href="/author">
-                      Submit Manuscript
+                    <a className="page-scroll" href="/journal">
+                      Journal
                     </a>
                   </li>
 
@@ -166,6 +166,11 @@ function Header({ show }) {
                             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                           }}
                         >
+                          <li>
+                            <a className="dropdown-item" href="/author">
+                              Submit Manuscript
+                            </a>
+                          </li>
                           <li>
                             <a className="dropdown-item" href="/general-info">
                               Engineering and Technology
