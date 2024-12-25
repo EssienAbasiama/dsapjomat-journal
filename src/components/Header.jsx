@@ -127,7 +127,7 @@ function Header({ show }) {
                             </a>
                           </li>
                           <li>
-                            <a className="dropdown-item" href="/terms">
+                            <a className="dropdown-item" href="/news">
                               NEWS
                             </a>
                           </li>

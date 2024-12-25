@@ -16,6 +16,8 @@ import Signup from "./components/Pages/Signup";
 import ContactUs from "./components/Pages/ContactUs";
 import About from "./components/Pages/About";
 import SubmitManuscript from "./components/Pages/SubmitManuscript/SubmitManuscript";
+import EditorialBoard from "./components/Pages/EditorialBoard";
+import NewsComponent from "./components/Pages/News";
 
 function App() {
   return (
@@ -41,8 +43,9 @@ function AppWithHeader() {
         <Route path="/register" element={<Signup />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/about-us" element={<About />} />
-        <Route path="/editorial-board" element={<About />} />
+        <Route path="/editorial-board" element={<EditorialBoard />} />
         <Route path="/author" element={<SubmitManuscript />} />
+        <Route path="/news" element={<NewsComponent />} />
       </Routes>
       {!isExcludedRoute && <Footer />}
     </>
