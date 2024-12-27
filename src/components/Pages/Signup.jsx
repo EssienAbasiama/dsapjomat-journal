@@ -1,17 +1,166 @@
+/* eslint-disable no-undef */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Input, Select, Checkbox, Tooltip } from "antd";
-import "antd/dist/reset.css"; // Ant Design styles
+import { Input, Select, Checkbox, Tooltip, message } from "antd";
+import "antd/dist/reset.css";
+import { APIURL } from "../../UTILS";
 const { Option } = Select;
 
 function Signup() {
-  const [proceed, setProceed] = useState(true);
+  const [proceed, setProceed] = useState(false);
   const inputStyle = { width: "100%", height: "45px" };
-  const handleProceed = () => {
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    title: "",
+    address: "",
+    rememberMe: false,
+    first_name: "",
+    middle: "",
+    last_name: "",
+    degree: "",
+    specialty: "",
+    phone: "",
+    country: "",
+    orcid: "",
+    confirm_email: "",
+    alternative_email: "",
+    username: "",
+    available_as_reviewer: false,
+    receive_news: false,
+    comments: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const handleProceed = (e) => {
+    e.preventDefault();
+    // Simple validation before proceeding
+    if (
+      !formData.email ||
+      !formData.password ||
+      formData.password !== formData.confirmPassword
+    ) {
+      setErrors({
+        ...errors,
+        email: !formData.email ? "Email is required" : "",
+        password: !formData.password ? "Password is required" : "",
+        confirmPassword:
+          formData.password !== formData.confirmPassword
+            ? "Passwords do not match"
+            : "",
+      });
+      return;
+    }
     setProceed(true);
   };
+  const handleOrcidChange = (e) => {
+    const value = e.target.value.replace(/\D/g, "");
+    const formattedValue = value
+      .match(/.{1,4}/g)
+      ?.join("-")
+      .substr(0, 19);
+
+    setFormData({ ...formData, orcid: formattedValue });
+  };
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleSelectChange = (value, field) => {
+    setFormData({
+      ...formData,
+      [field]: value,
+    });
+  };
+  const handleChange = (e) => {
+    const { name, value, checked, type } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.first_name) newErrors.first_name = "First name is required";
+    if (!formData.last_name) newErrors.last_name = "Last name is required";
+    if (!formData.phone) newErrors.phone = "Phone number is required";
+    if (!formData.country) newErrors.country = "Country is required";
+    if (!formData.orcid) newErrors.orcid = "ORCID is required";
+    if (!formData.confirm_email)
+      newErrors.confirm_email = "Confirm email is required";
+    if (formData.confirm_email !== formData.email)
+      newErrors.confirm_email = "Email addresses do not match";
+    if (!formData.username) newErrors.username = "Username is required";
+    if (formData.username && formData.username.length < 8)
+      newErrors.username = "Username must be at least 8 characters long";
+
+    // You can add more validation as needed
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    console.log("Registration data:", formData);
+    if (validateForm()) {
+      try {
+        const response = await fetch(`${APIURL}/auth/register`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          console.log("Registration successful", data);
+          setFormData({
+            email: "",
+            password: "",
+            confirmPassword: "",
+            title: "",
+            address: "",
+            rememberMe: false,
+            first_name: "",
+            middle: "",
+            last_name: "",
+            degree: "",
+            specialty: "",
+            phone: "",
+            country: "",
+            orcid: "",
+            confirm_email: "",
+            alternative_email: "",
+            username: "",
+            available_as_reviewer: false,
+            receive_news: false,
+            comments: "",
+          });
+        } else {
+          console.error("Registration failed", data);
+        }
+      } catch (error) {
+        console.error("Error during registration:", error);
+      }
+    } else {
+      message.error("Please fix the errors in the form.");
+    }
+  };
+
   return (
     <div id="" className="page">
       {!proceed ? (
@@ -98,34 +247,53 @@ function Signup() {
               <form>
                 <div className="mb-4">
                   <label className="d-block font-weight-bold text-dark mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Enter your name"
-                    className="form-control border rounded bg-white"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="d-block font-weight-bold text-dark mb-2">
                     Email
                   </label>
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
-                    className="form-control border rounded bg-white"
+                  <Input
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    name="email"
+                    placeholder="Email Address"
+                    style={inputStyle}
                   />
+                  {errors.email && (
+                    <span className="text-danger">{errors.email}</span>
+                  )}
                 </div>
 
                 <div className="mb-4">
                   <label className="d-block font-weight-bold text-dark mb-2">
                     Password
                   </label>
-                  <input
+                  <Input
                     type="password"
-                    placeholder="Confirm password"
-                    className="form-control border rounded bg-white"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    name="password"
+                    placeholder="Password"
+                    style={inputStyle}
                   />
+                  {errors.password && (
+                    <span className="text-danger">{errors.password}</span>
+                  )}
+                </div>
+                <div className="mb-4">
+                  <label className="d-block font-weight-bold text-dark mb-2">
+                    Confirm Password
+                  </label>
+                  <Input
+                    type="password"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    style={inputStyle}
+                  />
+                  {errors.confirmPassword && (
+                    <span className="text-danger">
+                      {errors.confirmPassword}
+                    </span>
+                  )}
                 </div>
 
                 <div className="d-flex align-items-center justify-content-between mb-4">
@@ -152,7 +320,7 @@ function Signup() {
                   className="btn btn-dark btn-block text-white font-weight-bold"
                   onClick={handleProceed}
                 >
-                  Sign up
+                  Proceed
                 </button>
 
                 <p className="text-center mt-3">
@@ -173,13 +341,21 @@ function Signup() {
           transition={{ duration: 0.5 }}
         >
           <h4 className="mb-4 font-weight-bold">Enter your details</h4>
-          <form>
+          <form onSubmit={handleRegister}>
             <div className="row">
               {/* Left Column */}
               <div className="col-md-6">
                 <div className="form-group">
                   <label>Title</label>
-                  <Select placeholder="-- Select --" style={inputStyle}>
+                  <Select
+                    name="title"
+                    placeholder="-- Select --"
+                    style={inputStyle}
+                    value={formData.title}
+                    onChange={(value) =>
+                      setFormData({ ...formData, title: value })
+                    }
+                  >
                     <Option value="Mr">Mr</Option>
                     <Option value="Ms">Ms</Option>
                     <Option value="Dr">Dr</Option>
@@ -188,27 +364,50 @@ function Signup() {
                 <div className="form-group">
                   <label>First Name *</label>
                   <Input
+                    name="first_name"
+                    value={formData.first_name}
+                    onChange={handleChange}
                     placeholder="Enter your first name"
                     style={inputStyle}
                   />
+                  {errors.first_name && (
+                    <div className="text-danger">{errors.first_name}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Middle</label>
                   <Input
+                    name="middle"
                     placeholder="Enter your middle name"
+                    value={formData.middle}
+                    onChange={handleChange}
                     style={inputStyle}
                   />
                 </div>
                 <div className="form-group">
                   <label>Last Name *</label>
                   <Input
+                    name="last_name"
                     placeholder="Enter your last name"
+                    value={formData.last_name}
+                    onChange={handleChange}
                     style={inputStyle}
                   />
+                  {errors.last_name && (
+                    <div className="text-danger">{errors.last_name}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Degree *</label>
-                  <Select placeholder="-- Select --" style={inputStyle}>
+                  <Select
+                    name="degree"
+                    placeholder="-- Select --"
+                    style={inputStyle}
+                    value={formData.degree}
+                    onChange={(value) =>
+                      setFormData({ ...formData, degree: value })
+                    }
+                  >
                     <Option value="Bachelors">Bachelors</Option>
                     <Option value="Masters">Masters</Option>
                     <Option value="PhD">PhD</Option>
@@ -216,21 +415,49 @@ function Signup() {
                 </div>
                 <div className="form-group">
                   <label>Specialty</label>
-                  <Select placeholder="-- Select --" style={inputStyle}>
+                  <Select
+                    name="specialty"
+                    placeholder="-- Select --"
+                    style={inputStyle}
+                    value={formData.specialty}
+                    onChange={(value) =>
+                      setFormData({ ...formData, specialty: value })
+                    }
+                  >
                     <Option value="Specialty1">Specialty 1</Option>
                     <Option value="Specialty2">Specialty 2</Option>
                   </Select>
                 </div>
                 <div className="form-group">
                   <label>Phone *</label>
-                  <Input placeholder="Enter phone number" style={inputStyle} />
+                  <Input
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Enter phone number"
+                    style={inputStyle}
+                  />
+                  {errors.phone && (
+                    <div className="text-danger">{errors.phone}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Country *</label>
-                  <Select placeholder="-- Select --" style={inputStyle}>
+                  <Select
+                    placeholder="-- Select --"
+                    style={inputStyle}
+                    name="country"
+                    value={formData.country}
+                    onChange={(value) =>
+                      setFormData({ ...formData, country: value })
+                    }
+                  >
                     <Option value="US">United States</Option>
                     <Option value="UK">United Kingdom</Option>
                   </Select>
+                  {errors.country && (
+                    <div className="text-danger">{errors.country}</div>
+                  )}
                 </div>
               </div>
 
@@ -241,42 +468,73 @@ function Signup() {
                   <Input
                     placeholder="XXXX-XXXX-XXXX-XXXX"
                     style={inputStyle}
+                    name="orcid"
+                    value={formData.orcid}
+                    onChange={handleOrcidChange}
                     suffix={
                       <Tooltip title="Your ORCID ID">
                         <i className="fas fa-info-circle"></i>
                       </Tooltip>
                     }
                   />
+                  {errors.orcid && (
+                    <div className="text-danger">{errors.orcid}</div>
+                  )}
                 </div>
-                <div className="form-group">
-                  <label>Email Address *</label>
-                  <Input placeholder="Enter email address" style={inputStyle} />
-                </div>
+
                 <div className="form-group">
                   <label>Confirm Email *</label>
                   <Input
                     placeholder="Re-enter email address"
                     style={inputStyle}
+                    name="confirm_email"
+                    value={formData.confirm_email}
+                    onChange={handleChange}
                   />
+                  {errors.confirm_email && (
+                    <div className="text-danger">{errors.confirm_email}</div>
+                  )}
                 </div>
                 <div className="form-group">
                   <label>Alternative Email Address</label>
                   <Input
-                    placeholder="Enter alternative email"
                     style={inputStyle}
+                    name="alternative_email"
+                    placeholder="Alternative Email"
+                    value={formData.alternative_email}
+                    onChange={handleChange}
                   />
                 </div>
                 <div className="form-group">
                   <label>Username (At least 8 characters) *</label>
-                  <Input placeholder="Enter username" style={inputStyle} />
+                  <Input
+                    placeholder="Username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    style={inputStyle}
+                    name="username"
+                  />
+                  {errors.username && (
+                    <div className="text-danger">{errors.username}</div>
+                  )}
                 </div>
                 <div className="form-group">
-                  <label>Available as Reviewer</label>
-                  <Checkbox>YES</Checkbox>
+                  <Checkbox
+                    name="available_as_reviewer"
+                    checked={formData.available_as_reviewer}
+                    onChange={handleChange}
+                  >
+                    Available as Reviewer
+                  </Checkbox>
                 </div>
                 <div className="form-group">
-                  <label>Receive News and Promotions</label>
-                  <Checkbox>YES</Checkbox>
+                  <Checkbox
+                    name="receive_news"
+                    checked={formData.receive_news}
+                    onChange={handleChange}
+                  >
+                    Receive News
+                  </Checkbox>
                 </div>
                 <div className="form-group">
                   <label>Comments</label>
@@ -284,6 +542,9 @@ function Signup() {
                     placeholder="Enter comments"
                     rows={3}
                     style={inputStyle}
+                    value={formData.comments}
+                    onChange={handleChange}
+                    name="comments"
                   />
                 </div>
               </div>
@@ -293,7 +554,7 @@ function Signup() {
               className="btn btn-block mt-4"
               style={{ background: "#163bb5", height: "45px" }}
             >
-              Submit
+              Sign Up
             </button>
           </form>
         </motion.div>

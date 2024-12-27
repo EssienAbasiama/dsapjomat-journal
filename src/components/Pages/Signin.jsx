@@ -1,10 +1,54 @@
+/* eslint-disable no-undef */
 /* eslint-disable react/no-unescaped-entities */
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { message, Spin } from "antd";
+import axios from "axios";
+import { APIURL } from "../../UTILS";
 
 function Signin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  const navigate = useNavigate();
+  const handleSignin = async (e) => {
+    e.preventDefault();
+
+    if (!email || !password) {
+      message.error("Please fill in all fields.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Send POST request to the login endpoint
+      const response = await axios.post(`${APIURL}/auth/login`, {
+        email,
+        password,
+      });
+      console.log(response);
+      if (response.status === 200) {
+        message.success("Successfully signed in!");
+        setIsAuthenticated(true); // Redirect after successful login
+        setLoading(false);
+      } else {
+        message.error("Invalid email or password.");
+        setLoading(false);
+      }
+    } catch (error) {
+      message.error("An error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  if (isAuthenticated) {
+    navigate("/journal");
+  }
   return (
-    <div id="" className="page">
+    <div id="" className="page" style={{}}>
       <div className="form-container max-w-[520px] px-4 sm:px-8 xl:px-0 shadow-lg p-4 bg-white rounded">
         <div className="form-container-item rounded-xl bg-white shadow-box p-4 sm:p-7.5 xl:p-12.5">
           <div className="text-center mb-9">
@@ -81,7 +125,7 @@ function Signin() {
           </div>
 
           <div className="mt-4">
-            <form>
+            <form onSubmit={handleSignin}>
               <div className="mb-4">
                 <label className="d-block font-weight-bold text-dark mb-2">
                   Email
@@ -90,6 +134,8 @@ function Signin() {
                   type="email"
                   placeholder="Enter your email"
                   className="form-control border rounded bg-white"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
 
@@ -101,6 +147,8 @@ function Signin() {
                   type="password"
                   placeholder="Confirm password"
                   className="form-control border rounded bg-white"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
 
@@ -109,9 +157,9 @@ function Signin() {
                   <input
                     type="checkbox"
                     className="custom-control-input"
-                    id="rememberMe"
+                    id="remember-me"
                   />
-                  <label className="custom-control-label" htmlFor="rememberMe">
+                  <label className="custom-control-label" htmlFor="remember-me">
                     Remember me
                   </label>
                 </div>
@@ -124,7 +172,7 @@ function Signin() {
                 type="submit"
                 className="btn btn-dark btn-block text-white font-weight-bold"
               >
-                Sign in
+                {loading ? <Spin /> : "Sign in"}
               </button>
 
               <p className="text-center mt-3">
