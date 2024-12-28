@@ -1,17 +1,17 @@
 /* eslint-disable no-undef */
 /* eslint-disable react/no-unescaped-entities */
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Input, Select, Checkbox, Tooltip, message } from "antd";
-import "antd/dist/reset.css";
-import { APIURL } from "../../UTILS";
+// import "antd/dist/reset.css";
+import { APIURL } from "../../constants";
 const { Option } = Select;
 
 function Signup() {
   const [proceed, setProceed] = useState(false);
   const inputStyle = { width: "100%", height: "45px" };
-
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -127,6 +127,10 @@ function Signup() {
         const data = await response.json();
 
         if (response.ok) {
+          message.success(
+            "Successful Registration, Kindly login to access the Journal"
+          );
+          navigate("/login");
           console.log("Registration successful", data);
           setFormData({
             email: "",

@@ -2,10 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Hero from "./Hero";
 import logo from "/src/assets/logo.png";
+import { isAuthenticated } from "../utility/authUtils";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function Header({ show }) {
   // State to manage active dropdown
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [isAuth, setIsAuth] = useState(false);
 
   // Refs for the dropdowns
   const dropdownRefs = [useRef(null), useRef(null)];
@@ -26,13 +29,21 @@ function Header({ show }) {
     }
   };
 
+  const navigate = useNavigate();
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const authStatus = await isAuthenticated();
+      setIsAuth(authStatus);
+    };
 
+    checkAuthentication();
+  }, [navigate]);
   return (
     <>
       <header id="header-wrap">
@@ -192,11 +203,19 @@ function Header({ show }) {
                   </li>
                 </ul>
               </div>
-              <div className="btn-sing d-none d-sm-block active flex">
-                <a className="btn btn-border page-scroll" href="/register">
-                  SignUp
-                </a>
-              </div>
+              {isAuth ? (
+                <div className="btn-sing d-none d-sm-block active flex">
+                  <a className="btn btn-border page-scroll" href="/register">
+                    Manuscript dashboard
+                  </a>
+                </div>
+              ) : (
+                <div className="btn-sing d-none d-sm-block active flex">
+                  <a className="btn btn-border page-scroll" href="/register">
+                    SignUp
+                  </a>
+                </div>
+              )}
             </nav>
           </div>
         </div>

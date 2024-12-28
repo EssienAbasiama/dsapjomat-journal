@@ -1,18 +1,20 @@
 /* eslint-disable no-undef */
 /* eslint-disable react/no-unescaped-entities */
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { message, Spin } from "antd";
 import axios from "axios";
-import { APIURL } from "../../UTILS";
+import { APIURL } from "../../constants";
+import { isAuthenticated, loginUser } from "../../utility/authUtils";
 
 function Signin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticatedTrue, setIsAuthenticated] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const handleSignin = async (e) => {
     e.preventDefault();
 
@@ -25,28 +27,37 @@ function Signin() {
 
     try {
       // Send POST request to the login endpoint
-      const response = await axios.post(`${APIURL}/auth/login`, {
-        email,
-        password,
-      });
-      console.log(response);
-      if (response.status === 200) {
+      const { token, user } = await loginUser(email, password);
+
+      console.log(token, user);
+      if (token) {
         message.success("Successfully signed in!");
-        setIsAuthenticated(true); // Redirect after successful login
+        setIsAuthenticated(true);
         setLoading(false);
+        return { user, token };
       } else {
         message.error("Invalid email or password.");
         setLoading(false);
       }
+      return { user, token };
     } catch (error) {
       message.error("An error occurred. Please try again.");
       setLoading(false);
     }
   };
 
-  if (isAuthenticated) {
-    navigate("/journal");
-  }
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const authStatus = await isAuthenticated();
+      setIsAuthenticated(authStatus);
+      if (authStatus) {
+        const from = "/journal";
+        navigate(from, { replace: true });
+      }
+    };
+
+    checkAuthentication();
+  }, [navigate]);
   return (
     <div id="" className="page" style={{}}>
       <div className="form-container max-w-[520px] px-4 sm:px-8 xl:px-0 shadow-lg p-4 bg-white rounded">
