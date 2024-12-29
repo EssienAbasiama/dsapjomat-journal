@@ -1,5 +1,4 @@
 import axios from "axios";
-
 import { decryptData, refreshAccessToken } from "./authUtils";
 import { APIURL } from "../constants";
 
@@ -9,13 +8,15 @@ export const apiClient = axios.create({
   withCredentials: true, // Send cookies with requests
 });
 
-// Set Authorization header from localStorage
-const authToken = localStorage.getItem("authToken");
-if (authToken) {
-  apiClient.defaults.headers.common["Authorization"] = `Bearer ${decryptData(
-    authToken
-  )}`;
-}
+// Add Authorization header lazily
+apiClient.interceptors.request.use((config) => {
+  const authToken = localStorage.getItem("refreshToken");
+  console.log("Protext", authToken);
+  if (authToken) {
+    config.headers["Authorization"] = `Bearer ${decryptData(authToken)}`;
+  }
+  return config;
+});
 
 // Add a response interceptor for automatic token refresh
 apiClient.interceptors.response.use(

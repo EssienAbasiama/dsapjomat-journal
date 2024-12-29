@@ -41,6 +41,10 @@ import {
   EyeOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { sortedCountries } from "../../../constants";
+import apiClient from "../../../utility/apiClient";
+import { saveManuscriptDraft } from "../../../utility/manuscriptRequest";
+import { decryptData } from "../../../utility/authUtils";
 
 const { Step } = Steps;
 const { Option } = Select;
@@ -49,6 +53,50 @@ function SubmitManuscript() {
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [current, setCurrent] = useState(0);
+  const [form] = Form.useForm();
+  const [previewVisible, setPreviewVisible] = useState(false);
+  const [previewJob, setPreviewJob] = useState(null);
+  const [isDepartmentModalVisible, setIsDepartmentModalVisible] =
+    useState(false);
+  const isSmallScreen = window.innerWidth <= 767;
+  const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
+  const [sending, setSending] = useState(false);
+  const [opening_date, setOpeningDate] = useState("");
+  const [expiring_date, setExpiringDate] = useState("");
+  const [orcidData, setOrcidData] = useState("");
+  const [tableData, setTableData] = useState([]);
+  const [reviewerData, setTableReviewerData] = useState([]);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedSubjects, setSelectedSubjects] = useState();
+  const [collectedData, setCollectedData] = useState({});
+  const [subjects, setSubjects] = useState([
+    "Physics",
+    "Mathematics",
+    "Biology",
+    "Chemistry",
+    "Engineering",
+    "Computer Science",
+  ]);
+  const [formData, setFormData] = useState({
+    type: "",
+    title: "",
+    abstract_text: "",
+    co_authors: [],
+    tags: [],
+    subjects: [],
+    other_subjects: "",
+    comments: "",
+    termsAndCondition: false,
+    suggestedReviewers: [],
+    responsibility: "",
+    file_type: "",
+    file_description: "",
+    cover_letter: "",
+    isDraft: false,
+  });
 
   const handleClose = (removedTag) => {
     setTags(tags.filter((tag) => tag !== removedTag));
@@ -73,8 +121,6 @@ function SubmitManuscript() {
     setInputValue("");
   };
 
-  const [drawerVisible, setDrawerVisible] = useState(false);
-
   const showDrawer = () => {
     setDrawerVisible(true);
   };
@@ -84,71 +130,164 @@ function SubmitManuscript() {
   const closeDrawer = () => {
     setDrawerVisible(false);
   };
-  const [current, setCurrent] = useState(0);
-  const [form] = Form.useForm();
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [previewJob, setPreviewJob] = useState(null);
-  const [isDepartmentModalVisible, setIsDepartmentModalVisible] =
-    useState(false);
-  const isSmallScreen = window.innerWidth <= 767;
-  const [loading, setLoading] = useState(false);
-  const [departments, setDepartments] = useState([]);
-  const [sending, setSending] = useState(false);
-  const [opening_date, setOpeningDate] = useState("");
-  const [expiring_date, setExpiringDate] = useState("");
-  const [formData, setFormData] = useState({
-    department_id: "",
-    job_title: "",
-    job_description: "",
-    employment_type: "",
-    salary: "",
-    currency: "",
-    city_country: "",
-    remote_options: "",
-    qualifications: "",
-    responsibility: "",
-    skills: "",
-    phone: "",
-    resume: "",
-    cover_letter: "",
-    location: "",
-    portfolio: "",
-    linkedin: "",
-    github: "",
-    video: "",
-    twitter: "",
-    website: "",
-    hiring_manager: "",
-    no_openings: "",
-  });
+
+  const authorColumn = [
+    {
+      title: "First Name",
+      dataIndex: "first_name",
+      key: "first_name",
+    },
+    {
+      title: "Last Name",
+      dataIndex: "last_name",
+      key: "last_name",
+    },
+    {
+      title: "Email",
+      dataIndex: "email",
+      key: "email",
+    },
+  ];
+
+  const addAuthor = async () => {
+    const email = form.getFieldValue("email");
+
+    if (!email) {
+      message.error("Please enter an email address.");
+      return;
+    }
+
+    // Check if the email already exists in the table
+    const isAlreadyAdded = tableData.some((author) => author.email === email);
+    if (isAlreadyAdded) {
+      message.warning("This author is already in the table.");
+      return;
+    }
+
+    try {
+      const response = await apiClient.post("/authors/add-author", {
+        email,
+      });
+
+      console.log("res", response);
+      if (response.status === 200) {
+        const user = response.data.user;
+        message.success("User found!");
+        setTableData((prevData) => [...prevData, user]);
+        form.setFieldsValue({ email: "" });
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        message.error("Author not found.");
+      } else {
+        message.error("An error occurred. Please try again.");
+      }
+    }
+  };
+  const handleSuggestedReviewers = async () => {
+    const email = form.getFieldValue("email");
+
+    if (!email) {
+      message.error("Please enter an email address.");
+      return;
+    }
+
+    // Check if the email already exists in the table
+    const isAlreadyAdded = reviewerData.some(
+      (author) => author.email === email
+    );
+    if (isAlreadyAdded) {
+      message.warning("This reviewer is already in the table.");
+      return;
+    }
+
+    try {
+      const response = await apiClient.post("/authors/add-author", {
+        email,
+      });
+
+      console.log("res", response);
+      if (response.status === 200) {
+        const user = response.data.user;
+        message.success("Reviewer found!");
+        setTableReviewerData((prevData) => [...prevData, user]);
+        form.setFieldsValue({ email: "" });
+      }
+    } catch (error) {
+      if (error.response?.status === 404) {
+        message.error("Reviewer not found.");
+      } else {
+        message.error("An error occurred. Please try again.");
+      }
+    }
+  };
 
   const onChange = (value, state) => {
     setFormData({ ...formData, [state]: value });
   };
-  const [subjects, setSubjects] = useState([
-    "Physics",
-    "Mathematics",
-    "Biology",
-    "Chemistry",
-    "Engineering",
-    "Computer Science",
-  ]);
+
   const onClosePreview = () => {
     setPreviewVisible(false);
   };
   const handleChange = (value) => {
+    setSelectedSubjects(value);
     console.log("Selected subjects:", value);
   };
 
   useEffect(() => {
     fetchDepartments();
   }, []);
+  const jumpToTab = (tab) => {
+    form
+      .validateFields()
+
+      .then(() => {
+        setCurrent(tab);
+      })
+      .catch((info) => {
+        console.log("Validation Failed:", info);
+      });
+  };
+  const encryptedUser = localStorage.getItem("user");
+  const user = encryptedUser ? JSON.parse(decryptData(encryptedUser)) : null;
+  // Extract the `created_by` field from the decrypted user data
+  const created_by = user ? user.id : null; // Assuming the user object has an `id` field
 
   const next = () => {
     form
       .validateFields()
       .then(() => {
+        // Get current step's form data
+        const formData = form.getFieldsValue();
+
+        // Merge with collected data
+        const updatedData = {
+          ...collectedData,
+          ...formData,
+          co_authors: tableData,
+          suggestedReviewers: reviewerData,
+          drafted_at: null,
+          isDraft: false,
+          tags: tags,
+          created_by,
+        };
+
+        // Save to state
+        setCollectedData(updatedData);
+
+        // Save to localStorage
+        localStorage.setItem("manuscriptDraft", JSON.stringify(updatedData));
+        console.log("curr", current);
+        if (current === 7 && reviewerData.length < 3) {
+          message.error("Select at least 3 reviewers");
+          console.log("Less than");
+          return;
+        }
+
+        // Move to the next step
         setCurrent(current + 1);
+
+        console.log("Updated Data:", updatedData);
       })
       .catch((info) => {
         console.log("Validation Failed:", info);
@@ -264,33 +403,64 @@ function SubmitManuscript() {
       size: "12.26 KB",
     },
   ];
+
   const handleSubmit = async () => {
     setSending(true);
     try {
-      const token = document
-        .querySelector('meta[name="csrf-token"]')
-        .getAttribute("content");
-      const values = await form.validateFields();
-      const formattedData = {
-        ...formData,
-        opening_date: opening_date,
-        expiring_date: expiring_date,
-      };
+      const created_at = new Date().toISOString();
+      let updatedData = { ...collectedData, created_at };
 
-      // await axios.post("/create/job-opening", formattedData, {
-      //   headers: {
-      //     "X-CSRF-Token": token,
-      //   },
-      // });
-      message.success("Job opening created successfully");
-      form.resetFields();
-      setCurrent(0);
+      // If it's not a draft, update the data for submission
+      if (current === 10) {
+        updatedData = {
+          ...updatedData,
+          drafted_at: null,
+          isDraft: false,
+        };
+      }
+
+      const files = updatedData.files.fileList; // Get the uploaded files from the form
+      console.log("Files", files);
+      if (files && files.length > 0) {
+        updatedData.files = files.map((file) => file.originFileObj);
+      } else {
+        updatedData.files = [];
+      }
+
+      console.log("Payload", updatedData);
+      // Save the manuscript data by making the POST request
+      const response = await saveManuscriptDraft(updatedData);
+
+      if (response.success) {
+        // If the manuscript is saved successfully
+        message.success("Manuscript saved successfully");
+        form.resetFields();
+        setCurrent(0);
+        setCollectedData({}); // Reset the collected data after success
+        localStorage.removeItem("manuscriptDraft"); // Optional: Remove draft from localStorage if saved
+      } else {
+        // If there was an error in saving the manuscript
+        message.error(`Failed to save manuscript: ${response.error}`);
+      }
+
       setSending(false);
     } catch (error) {
       console.log(error);
       setSending(false);
-      message.error("Failed to create job opening");
+      message.error("Failed to save manuscript");
     }
+  };
+
+  const handleOrcidChange = (e) => {
+    const value = e.target.value.replace(/[^\d]/g, ""); // Remove non-numeric characters
+    const formattedValue = value
+      .match(/.{1,4}/g) // Group into chunks of 4 digits
+      ?.join("-") // Join with hyphens
+      .substr(0, 19); // Limit to 19 characters (XXXX-XXXX-XXXX-XXXX)
+
+    setFormData({ ...formData, orcid: formattedValue });
+    setOrcidData(formData.orcid);
+    console.log("Data", formData.orcid);
   };
 
   const handleKeyPress = (event) => {
@@ -376,6 +546,18 @@ function SubmitManuscript() {
               >
                 <Select.Option value="research">Research Paper</Select.Option>
                 <Select.Option value="review">Review Article</Select.Option>
+                <Select.Option value="Short Communication">
+                  Short Communication
+                </Select.Option>
+                <Select.Option value="Letter to Editor">
+                  Letter to Editor
+                </Select.Option>
+                <Select.Option value="Special Issue: CFD9">
+                  Special Issue: CFD9
+                </Select.Option>
+                <Select.Option value="Special Issue: Gas Hydrates">
+                  Special Issue: Gas Hydrates
+                </Select.Option>
               </Select>
             </Form.Item>
 
@@ -383,6 +565,7 @@ function SubmitManuscript() {
             <Form.Item>
               <Button
                 type="primary"
+                onClick={next}
                 htmlType="submit"
                 style={{
                   width: "100%",
@@ -420,7 +603,7 @@ function SubmitManuscript() {
               label="Full Title"
               name="full_title"
               rules={[
-                { required: false, message: "Qualifications is required" },
+                { required: true, message: "Qualifications is required" },
               ]}
             >
               <ReactQuill
@@ -433,7 +616,7 @@ function SubmitManuscript() {
             <Form.Item
               label="Running Title"
               name="running_title"
-              rules={[{ required: false, message: "skills is required" }]}
+              rules={[{ required: true, message: "skills is required" }]}
             >
               <ReactQuill
                 theme="snow"
@@ -444,7 +627,8 @@ function SubmitManuscript() {
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -494,131 +678,26 @@ function SubmitManuscript() {
             <Form.Item
               label="Email Address"
               name="email"
-              rules={[{ required: true, message: "Email is required" }]}
+              rules={[{ required: false, message: "Email is required" }]}
             >
               <Input placeholder="Enter email address" type="email" />
             </Form.Item>
 
-            {/* Title */}
-            <Form.Item
-              label="Title"
-              name="title"
-              rules={[{ required: true, message: "Title is required" }]}
-            >
-              <Select placeholder="Select title">
-                <Option value="mr">Mr.</Option>
-                <Option value="ms">Ms.</Option>
-                <Option value="dr">Dr.</Option>
-              </Select>
-            </Form.Item>
-
-            {/* Name Fields */}
-            <Form.Item
-              label="First Name"
-              name="firstName"
-              rules={[{ required: true, message: "First Name is required" }]}
-            >
-              <Input placeholder="Enter first name" />
-            </Form.Item>
-            <Form.Item label="Middle Name" name="middleName">
-              <Input placeholder="Enter middle name" />
-            </Form.Item>
-            <Form.Item
-              label="Last Name"
-              name="lastName"
-              rules={[{ required: true, message: "Last Name is required" }]}
-            >
-              <Input placeholder="Enter last name" />
-            </Form.Item>
-
-            {/* ORCID */}
-            <Form.Item
-              label="ORCID"
-              name="orcid"
-              rules={[
-                { required: true, message: "ORCID is required" },
-                {
-                  pattern: /^\d{4}-\d{4}-\d{4}-\d{4}$/,
-                  message: "Invalid ORCID format",
-                },
-              ]}
-            >
-              <Input placeholder="0000-0000-0000-0000" />
-            </Form.Item>
-
-            {/* Degree */}
-            <Form.Item
-              label="Degree"
-              name="degree"
-              rules={[{ required: true, message: "Degree is required" }]}
-            >
-              <Select placeholder="Select degree">
-                <Option value="bachelors">Bachelors</Option>
-                <Option value="masters">Masters</Option>
-                <Option value="phd">Ph.D.</Option>
-              </Select>
-            </Form.Item>
-
-            {/* Position */}
-            <Form.Item
-              label="Position"
-              name="position"
-              rules={[{ required: true, message: "Position is required" }]}
-            >
-              <Select placeholder="Select position">
-                <Option value="professor">Professor</Option>
-                <Option value="researcher">Researcher</Option>
-                <Option value="student">Student</Option>
-              </Select>
-            </Form.Item>
-
-            {/* Phone Numbers */}
-            <Form.Item label="Phone" name="phone">
-              <Input placeholder="Enter phone number" />
-            </Form.Item>
-            <Form.Item label="Mobile" name="mobile">
-              <Input placeholder="Enter mobile number" />
-            </Form.Item>
-
-            {/* Country and City */}
-            <Form.Item
-              label="Country"
-              name="country"
-              rules={[{ required: true, message: "Country is required" }]}
-            >
-              <Select placeholder="Select country">
-                <Option value="usa">USA</Option>
-                <Option value="uk">UK</Option>
-                <Option value="india">India</Option>
-              </Select>
-            </Form.Item>
-            <Form.Item label="City" name="city">
-              <Input placeholder="Enter city" />
-            </Form.Item>
-
-            {/* Affiliation */}
-            <Form.Item
-              label="Affiliation"
-              name="affiliation"
-              rules={[{ required: true, message: "Affiliation is required" }]}
-            >
-              <ReactQuill theme="snow" />
-            </Form.Item>
-
             {/* Checkbox */}
-            <Form.Item name="correspondingAuthor" valuePropName="checked">
+            {/* <Form.Item name="correspondingAuthor" valuePropName="checked">
               <Checkbox>This author is a Corresponding Author</Checkbox>
-            </Form.Item>
+            </Form.Item> */}
 
             {/* Buttons */}
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
-                icon={<SaveOutlined />}
+                // htmlType="submit"
+                onClick={addAuthor}
+                icon={<PlusOutlined />}
                 style={{ marginRight: "10px" }}
               >
-                Save Author
+                Add Author
               </Button>
               <Button
                 htmlType="button"
@@ -628,10 +707,17 @@ function SubmitManuscript() {
                 Reset
               </Button>
             </Form.Item>
+            <Table
+              dataSource={tableData}
+              columns={authorColumn}
+              rowKey="id"
+              style={{ marginTop: "20px" }}
+            />
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -684,7 +770,7 @@ function SubmitManuscript() {
               label=""
               name="abstract_text"
               style={{}}
-              rules={[{ required: true, message: "Affiliation is required" }]}
+              rules={[{ required: true, message: "Abstract Text is required" }]}
             >
               <ReactQuill theme="snow" />
             </Form.Item>
@@ -692,7 +778,8 @@ function SubmitManuscript() {
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -769,7 +856,8 @@ function SubmitManuscript() {
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -839,7 +927,8 @@ function SubmitManuscript() {
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -861,7 +950,7 @@ function SubmitManuscript() {
           <h3
             style={{ borderBottom: "1px solid #d9d9d9", paddingBottom: "8px" }}
           >
-            Enter Enter the additional comments on your submission
+            Enter the additional comments on your submission
           </h3>
 
           {/* Info Box */}
@@ -881,8 +970,8 @@ These comments will not appear in your manuscript."
           >
             <Form.Item
               label="Enter your content"
-              name="content"
-              rules={[{ required: true, message: "Content is required" }]}
+              name="comments"
+              rules={[{ required: false, message: "Content is required" }]}
             >
               <ReactQuill
                 value={formData.qualifications}
@@ -912,7 +1001,8 @@ These comments will not appear in your manuscript."
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -957,156 +1047,29 @@ These comments will not appear in your manuscript."
             style={{ background: "#fff", padding: "20px", borderRadius: "8px" }}
           >
             {/* Email */}
-            <div className="form-row">
-              <Form.Item
-                label="Email Address"
-                name="email"
-                className="form-item-half"
-                rules={[{ required: true, message: "Email is required" }]}
-              >
-                <Input placeholder="Enter email address" type="email" />
-              </Form.Item>
-
-              {/* Title */}
-              <Form.Item
-                label="Title"
-                name="title"
-                className="form-item-half"
-                rules={[{ required: true, message: "Title is required" }]}
-              >
-                <Select placeholder="Select title">
-                  <Option value="mr">Mr.</Option>
-                  <Option value="ms">Ms.</Option>
-                  <Option value="dr">Dr.</Option>
-                </Select>
-              </Form.Item>
-            </div>
-            <div className="form-row">
-              <Form.Item
-                label="First Name"
-                name="firstName"
-                className="form-item-half"
-                rules={[{ required: true, message: "First Name is required" }]}
-              >
-                <Input placeholder="Enter first name" />
-              </Form.Item>
-              <Form.Item
-                label="Middle Name"
-                name="middleName"
-                className="form-item-half"
-              >
-                <Input placeholder="Enter middle name" />
-              </Form.Item>
-            </div>
-            <div className="form-row">
-              <Form.Item
-                label="Last Name"
-                name="lastName"
-                className="form-item-half"
-                rules={[{ required: true, message: "Last Name is required" }]}
-              >
-                <Input placeholder="Enter last name" />
-              </Form.Item>
-
-              <Form.Item
-                label="ORCID"
-                className="form-item-half"
-                name="orcid"
-                rules={[
-                  { required: true, message: "ORCID is required" },
-                  {
-                    pattern: /^\d{4}-\d{4}-\d{4}-\d{4}$/,
-                    message: "Invalid ORCID format",
-                  },
-                ]}
-              >
-                <Input placeholder="0000-0000-0000-0000" />
-              </Form.Item>
-            </div>
-            {/* Degree */}
-            <div className="form-row">
-              <Form.Item
-                label="Degree"
-                className="form-item-half"
-                name="degree"
-                rules={[{ required: true, message: "Degree is required" }]}
-              >
-                <Select placeholder="Select degree">
-                  <Option value="bachelors">Bachelors</Option>
-                  <Option value="masters">Masters</Option>
-                  <Option value="phd">Ph.D.</Option>
-                </Select>
-              </Form.Item>
-
-              {/* Position */}
-              <Form.Item
-                label="Position"
-                name="position"
-                className="form-item-half"
-                rules={[{ required: true, message: "Position is required" }]}
-              >
-                <Select placeholder="Select position">
-                  <Option value="professor">Professor</Option>
-                  <Option value="researcher">Researcher</Option>
-                  <Option value="student">Student</Option>
-                </Select>
-              </Form.Item>
-            </div>
-            <div className="form-row">
-              <Form.Item label="Phone" name="phone" className="form-item-half">
-                <Input placeholder="Enter phone number" />
-              </Form.Item>
-              <Form.Item
-                label="Mobile"
-                name="mobile"
-                className="form-item-half"
-              >
-                <Input placeholder="Enter mobile number" />
-              </Form.Item>
-            </div>
-
-            <div className="form-row">
-              <Form.Item
-                label="Country"
-                name="country"
-                className="form-item-half"
-                rules={[{ required: true, message: "Country is required" }]}
-              >
-                <Select placeholder="Select country">
-                  <Option value="usa">USA</Option>
-                  <Option value="uk">UK</Option>
-                  <Option value="india">India</Option>
-                </Select>
-              </Form.Item>
-              <Form.Item label="City" name="city" className="form-item-half">
-                <Input placeholder="Enter city" />
-              </Form.Item>
-            </div>
-
             <Form.Item
-              label="Affiliation"
-              name="affiliation"
-              rules={[{ required: true, message: "Affiliation is required" }]}
+              label="Email Address"
+              name="email"
+              rules={[{ required: false, message: "Email is required" }]}
             >
-              <ReactQuill theme="snow" />
+              <Input placeholder="Enter email address" type="email" />
             </Form.Item>
-            <Form.Item
-              label="Reason"
-              name="reason"
-              rules={[{ required: false }]}
-            >
-              <ReactQuill theme="snow" />
-            </Form.Item>
+
+            {/* Checkbox */}
+            {/* <Form.Item name="correspondingAuthor" valuePropName="checked">
+              <Checkbox>This author is a Corresponding Author</Checkbox>
+            </Form.Item> */}
 
             {/* Buttons */}
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
-                icon={<SaveOutlined />}
+                // htmlType="submit"
+                onClick={handleSuggestedReviewers}
+                icon={<PlusOutlined />}
                 style={{ marginRight: "10px" }}
               >
-                Save Reviewer
+                Ask for Review
               </Button>
               <Button
                 htmlType="button"
@@ -1116,10 +1079,16 @@ These comments will not appear in your manuscript."
                 Reset
               </Button>
             </Form.Item>
+            <Table
+              dataSource={reviewerData}
+              columns={authorColumn}
+              rowKey="id"
+              style={{ marginTop: "20px" }}
+            />
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
@@ -1174,9 +1143,21 @@ These comments will not appear in your manuscript."
               rules={[{ required: true, message: "File type is required" }]}
             >
               <Select placeholder="Select file type" style={{ height: "50px" }}>
-                <Select.Option value="pdf">PDF</Select.Option>
-                <Select.Option value="doc">Word Document</Select.Option>
-                <Select.Option value="ppt">PowerPoint</Select.Option>
+                <Select.Option value="mainFile">
+                  Manuscript Main File (Without Author's Name)
+                </Select.Option>
+                <Select.Option value="ResearchHighlight">
+                  Research Highlight
+                </Select.Option>
+                <Select.Option value="Graphicalhighlight">
+                  Graphical Highlight
+                </Select.Option>
+                <Select.Option value="supplimentaryFile">
+                  Supplimentary File
+                </Select.Option>
+
+                <Select.Option value="figure">Figure</Select.Option>
+                <Select.Option value="titlePage">Title Page</Select.Option>
               </Select>
             </Form.Item>
 
@@ -1233,14 +1214,15 @@ These comments will not appear in your manuscript."
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
                   background: "rgb(22, 59, 181)",
                 }}
               >
-                Submit
+                Upload Files and Continue
               </Button>
             </Form.Item>
           </Form>
@@ -1320,7 +1302,7 @@ These comments will not appear in your manuscript."
               <ReactQuill
                 theme="snow"
                 placeholder="Write your cover letter here..."
-                style={{ minHeight: "200px" }}
+                style={{ minHeight: "50px" }}
               />
             </Form.Item>
 
@@ -1328,14 +1310,15 @@ These comments will not appear in your manuscript."
             <Form.Item>
               <Button
                 type="primary"
-                htmlType="submit"
+                // htmlType="submit"
+                onClick={next}
                 style={{
                   width: "100%",
                   height: "45px",
                   background: "rgb(22, 59, 181)",
                 }}
               >
-                Submit
+                Next
               </Button>
             </Form.Item>
           </Form>
@@ -1346,12 +1329,12 @@ These comments will not appear in your manuscript."
       title: "Finish Submission",
       content: (
         <div>
-          <Alert
+          {/* <Alert
             message="You cannot finish your submission until completing the: At least 5 suggested reviewers; Attach Files (Cover Letter)"
             type="error"
             showIcon
             style={{ marginBottom: "16px" }}
-          />
+          /> */}
 
           <Card title="Your Submission Summary">
             <Typography.Title level={5}>
@@ -1465,19 +1448,28 @@ These comments will not appear in your manuscript."
 
   const handleSaveDraft = async () => {
     try {
-      const formattedData = {
-        ...formData,
-        opening_date: opening_date,
-        expiring_date: expiring_date,
-      };
-      localStorage.setItem("jobOpeningDraft", JSON.stringify(formattedData));
-      setPreviewJob(formattedData);
-      message.success("Draft saved successfully");
+      const drafted_at = new Date().toISOString();
+      if (current === 10) {
+        const updatedData = {
+          ...collectedData,
+          drafted_at,
+          isDraft: true,
+        };
+
+        // Save to state
+        setCollectedData(updatedData);
+        // Save to localStorage
+        localStorage.setItem("manuscriptDraft", JSON.stringify(updatedData));
+      }
+      message.success("Job opening created successfully");
+      form.resetFields();
+      setCurrent(0);
+      setSending(false);
     } catch (error) {
       message.error("Failed to save draft");
     }
   };
-  const [activeItemId, setActiveItemId] = useState('1');
+  const [activeItemId, setActiveItemId] = useState("1");
   return (
     <>
       <div className="page-container">
@@ -1537,8 +1529,9 @@ These comments will not appear in your manuscript."
                       <Step
                         key={index}
                         title={item.title}
-                        onClick={() => setCurrent(index)}
+                        onClick={() => jumpToTab(index)}
                         className="step-item"
+                        style={{ cursor: "pointer" }}
                       />
                     ))}
                   </Steps>
@@ -1574,9 +1567,15 @@ These comments will not appear in your manuscript."
                   Preview
                 </Button>
                 <div>
-                  <Button style={{ margin: "0 8px" }} onClick={handleSaveDraft}>
-                    Save as Draft
-                  </Button>
+                  {current === steps.length - 1 && (
+                    <Button
+                      style={{ margin: "0 8px" }}
+                      onClick={handleSaveDraft}
+                    >
+                      Save as Draft
+                    </Button>
+                  )}
+
                   {current > 0 && (
                     <Button style={{ margin: "0 8px" }} onClick={() => prev()}>
                       Previous

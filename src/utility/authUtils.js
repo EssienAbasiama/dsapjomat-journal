@@ -43,13 +43,14 @@ export const loginUser = async (email, password) => {
     });
 
     if (response.status === 200) {
-      const { token, expiresAt, user } = response.data;
+      const { refreshToken, expiresAt, user } = response.data;
 
       // Encrypt and save token and expiry
-      localStorage.setItem("authToken", encryptData(token));
+      localStorage.setItem("refreshToken", encryptData(refreshToken));
       localStorage.setItem("tokenExpiry", encryptData(expiresAt.toString()));
+      localStorage.setItem("user", encryptData(JSON.stringify(user)));
 
-      return { user, token };
+      return { user, refreshToken };
     }
   } catch (error) {
     console.error(
@@ -65,7 +66,7 @@ export const loginUser = async (email, password) => {
  * @returns {boolean} - True if authenticated, false otherwise
  */
 export const isAuthenticated = async () => {
-  const encryptedToken = localStorage.getItem("authToken");
+  const encryptedToken = localStorage.getItem("refreshToken");
   const encryptedExpiry = localStorage.getItem("tokenExpiry");
 
   if (encryptedToken && encryptedExpiry) {
@@ -91,8 +92,9 @@ export const isAuthenticated = async () => {
  * Logs out the user by clearing localStorage
  */
 export const logoutUser = () => {
-  localStorage.removeItem("authToken");
+  localStorage.removeItem("refreshToken");
   localStorage.removeItem("tokenExpiry");
+  localStorage.removeItem("user");
 };
 
 /**
@@ -101,8 +103,8 @@ export const logoutUser = () => {
  */
 export const refreshAccessToken = async () => {
   try {
-    const response = await axios.post(
-      `${APIURL}/auth/refresh`,
+    const response = await apiClient.post(
+      `/auth/refresh`,
       {},
       { withCredentials: true }
     );
@@ -111,7 +113,7 @@ export const refreshAccessToken = async () => {
       const { token, expiresAt } = response.data;
 
       // Encrypt and save the new token and expiry
-      localStorage.setItem("authToken", encryptData(token));
+      localStorage.setItem("refreshToken", encryptData(token));
       localStorage.setItem("tokenExpiry", encryptData(expiresAt.toString()));
 
       return token;
@@ -121,6 +123,7 @@ export const refreshAccessToken = async () => {
       "Token refresh error:",
       error.response?.data?.message || error.message
     );
+
     return null;
   }
 };

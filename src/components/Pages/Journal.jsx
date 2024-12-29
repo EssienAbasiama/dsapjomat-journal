@@ -82,36 +82,54 @@ const Journal = () => {
       date: "May 15, 2021",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/f13c542303e28afe8a0d8d5aed107c61/fc596/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
     {
       title: "A Pandemic Nurse's Love Letter to New York",
       date: "June 2, 2020",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/d99a0ca1fbf77c815fc0a1484db4ed2d/6b99c/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
     {
       title: "Am I Ovulating? How to Spot the Signs",
       date: "May 15, 2021",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/dcc7787dc9059b24e64832c7086cf6d6/6b99c/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
     {
       title: "A Pandemic Nurse's Love Letter to New York",
       date: "June 2, 2020",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/9d33424e607688cd3c5d27a6d51dcb94/6b99c/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
     {
       title: "Am I Ovulating? How to Spot the Signs",
       date: "May 15, 2021",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/a7138a11a2b6524096fc8fa545524f36/6b99c/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
     {
       title: "A Pandemic Nurse's Love Letter to New York",
       date: "June 2, 2020",
       time: "1 min read",
       img: "https://flexiblog-medical.netlify.app/static/cd7dc614f389c2944b377b602e17cf40/6b99c/image.webp",
+      authorImage:
+        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
+      author: "John Doe",
     },
   ];
 
@@ -267,6 +285,30 @@ const Journal = () => {
                   <p className="card-text">
                     {item.date} • {item.time}
                   </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "13px",
+                      color: "#fff",
+                    }}
+                  >
+                    <img
+                      src={item.authorImage}
+                      alt={item.author}
+                      style={{
+                        width: "50px",
+                        height: "50px",
+                        borderRadius: "50%",
+                        marginRight: "10px",
+                      }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: "700" }}>{item.author}</div>
+                      <span>{item.date}</span>
+                      <span> • {item.time}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </motion.div>

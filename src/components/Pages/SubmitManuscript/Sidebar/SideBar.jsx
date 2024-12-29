@@ -3,6 +3,8 @@ import React, { useState } from "react";
 import "./SideBar.css";
 import { Tooltip } from "react-tooltip";
 import logo from "/src/assets/logo.png";
+import { logoutUser } from "../../../../utility/authUtils";
+import { useNavigate } from "react-router-dom";
 
 const svgData = [
   {
@@ -219,6 +221,8 @@ const SideBar = ({
   activeItemId,
   setActiveItemId,
 }) => {
+  const navigate = useNavigate();
+
   const handleItemClick = (id) => {
     const itemContainer = document.getElementById(`sidebar-item-${id}`);
 
@@ -233,6 +237,10 @@ const SideBar = ({
     console.log("Active Data", activeItemId);
   };
 
+  const handleLogout = () => {
+    logoutUser();
+    navigate("/login");
+  };
   return (
     <div
       className={`sideBar displayNone ${
@@ -480,6 +488,7 @@ const SideBar = ({
           style={{ borderRadius: "10px", fontSize: "12px" }}
         />
         <div
+          onClick={handleLogout}
           data-tooltip-id="Logout"
           data-tooltip-content="Logout"
           data-tooltip-place="right"

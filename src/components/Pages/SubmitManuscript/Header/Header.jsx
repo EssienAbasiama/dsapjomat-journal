@@ -1,10 +1,30 @@
 /* eslint-disable react/no-unknown-property */
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Header.css";
 import Profile from "./../../../../assets/images/HeaderProfile.png";
+import { decryptData } from "../../../../utility/authUtils";
 
 const JournalHeader = ({ darkModeTheme }) => {
   const [sideBarOpened, setsideBarOpened] = useState(false);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // Load user from secure storage on app load
+    const loadUser = async () => {
+      const storedToken = localStorage.getItem("authToken");
+      const storedUser = localStorage.getItem("user");
+
+      if (storedToken && storedUser) {
+        setToken(decryptData(storedToken));
+        setUser(JSON.parse(decryptData(storedUser)));
+      }
+
+      setLoading(false);
+    };
+
+    loadUser();
+  }, []);
   const handleIconClick = () => {
     // Toggle the sidebar state
     setsideBarOpened(!sideBarOpened);
@@ -114,9 +134,9 @@ const JournalHeader = ({ darkModeTheme }) => {
                 darkModeTheme ? "header-text-dark-mode" : "light-name"
               }`}
             >
-              Justin Bergson
+              {user?.username ? "Justin Bergson" : user?.username}
             </p>
-            <p className="email">Justin@gmail.com</p>
+            <p className="email">{user?.email}</p>
           </div>
           <svg
             xmlns="http://www.w3.org/2000/svg"

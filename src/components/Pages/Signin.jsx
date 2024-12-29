@@ -27,19 +27,19 @@ function Signin() {
 
     try {
       // Send POST request to the login endpoint
-      const { token, user } = await loginUser(email, password);
+      const { refreshToken, user } = await loginUser(email, password);
 
-      console.log(token, user);
-      if (token) {
+      console.log(refreshToken, user);
+      if (refreshToken) {
         message.success("Successfully signed in!");
         setIsAuthenticated(true);
         setLoading(false);
-        return { user, token };
+        return { user, refreshToken };
       } else {
         message.error("Invalid email or password.");
         setLoading(false);
       }
-      return { user, token };
+      return { user, refreshToken };
     } catch (error) {
       message.error("An error occurred. Please try again.");
       setLoading(false);
@@ -57,7 +57,7 @@ function Signin() {
     };
 
     checkAuthentication();
-  }, [navigate]);
+  }, [isAuthenticatedTrue, navigate]);
   return (
     <div id="" className="page" style={{}}>
       <div className="form-container max-w-[520px] px-4 sm:px-8 xl:px-0 shadow-lg p-4 bg-white rounded">

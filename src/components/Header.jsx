@@ -205,7 +205,7 @@ function Header({ show }) {
               </div>
               {isAuth ? (
                 <div className="btn-sing d-none d-sm-block active flex">
-                  <a className="btn btn-border page-scroll" href="/register">
+                  <a className="btn btn-border page-scroll" href="/author">
                     Manuscript dashboard
                   </a>
                 </div>
