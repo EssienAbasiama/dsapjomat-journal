@@ -12,7 +12,7 @@ const JournalHeader = ({ darkModeTheme }) => {
   useEffect(() => {
     // Load user from secure storage on app load
     const loadUser = async () => {
-      const storedToken = localStorage.getItem("authToken");
+      const storedToken = localStorage.getItem("refreshToken");
       const storedUser = localStorage.getItem("user");
 
       if (storedToken && storedUser) {

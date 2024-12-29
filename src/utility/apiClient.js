@@ -11,7 +11,7 @@ export const apiClient = axios.create({
 // Add Authorization header lazily
 apiClient.interceptors.request.use((config) => {
   const authToken = localStorage.getItem("refreshToken");
-  console.log("Protext", authToken);
+
   if (authToken) {
     config.headers["Authorization"] = `Bearer ${decryptData(authToken)}`;
   }

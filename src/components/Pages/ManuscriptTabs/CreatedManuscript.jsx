@@ -5,39 +5,7 @@ import { decryptData } from "../../../utility/authUtils";
 
 const { Content } = Layout;
 
-const drafts = [
-  {
-    id: 1,
-    name: "Practice Written Assignment",
-    type: "Document",
-    date: "Nov 8, 2024",
-  },
-  { id: 2, name: "ELE 350 Assignment", type: "Document", date: "Jul 15, 2024" },
-  { id: 3, name: "Resume", type: "Document", date: "Sep 6, 2023" },
-  { id: 4, name: "Untitled Document", type: "Document", date: "Sep 23, 2024" },
-  { id: 5, name: "Recording jobOffer", type: "Video", date: "Jun 11, 2024" },
-  { id: 6, name: "Job Offer UI", type: "Video", date: "May 24, 2024" },
-  {
-    id: 7,
-    name: "Review of HR Attendance",
-    type: "Document",
-    date: "May 6, 2024",
-  },
-  {
-    id: 8,
-    name: "Transforming Campus",
-    type: "Document",
-    date: "Sep 27, 2023",
-  },
-  {
-    id: 9,
-    name: "Employment Contract",
-    type: "Word File",
-    date: "Jul 3, 2024",
-  },
-];
-
-const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
+const CreatedManuscript = ({ darkModeTheme, createdBy, drawerVisible }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [drafts, setDrafts] = useState([]);
   const [fetching, setFetching] = useState();
@@ -79,7 +47,7 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
         const response = await apiClient.get("/manuscripts", {
           params: {
             created_by: id,
-            isDraft: true,
+            isDraft: false,
           },
         });
 
@@ -231,7 +199,7 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
                 color: darkModeTheme ? "rgb(255, 255, 255)" : "",
               }}
             >
-              Manuscript Drafts
+              My Manuscript
             </h3>
             <div className="sales-trend-header-right">
               <p id="green-link" className="green-link">
@@ -262,4 +230,4 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
   );
 };
 
-export default ManuscriptDrafts;
+export default CreatedManuscript;

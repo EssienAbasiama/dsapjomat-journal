@@ -1266,4 +1266,6 @@ textarea {
   border-color: rgb(21 23 26);
 }
 
-
+:where(.css-dev-only-do-not-override-1kf000u).ant-message {
+  z-index: 1000000;
+}

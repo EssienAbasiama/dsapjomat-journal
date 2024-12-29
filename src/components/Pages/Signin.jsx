@@ -41,7 +41,7 @@ function Signin() {
       }
       return { user, refreshToken };
     } catch (error) {
-      message.error("An error occurred. Please try again.");
+      message.error(":" + error);
       setLoading(false);
     }
   };

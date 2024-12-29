@@ -602,15 +602,9 @@ function SubmitManuscript() {
             <Form.Item
               label="Full Title"
               name="full_title"
-              rules={[
-                { required: true, message: "Qualifications is required" },
-              ]}
+              rules={[{ required: true, message: "Title is required" }]}
             >
-              <ReactQuill
-                theme="snow"
-                value={formData.qualifications}
-                onChange={(value) => onChange(value, "qualifications")}
-              />
+              <Input placeholder="Enter Title Here" type="text" />
             </Form.Item>
 
             <Form.Item
@@ -1630,6 +1624,7 @@ These comments will not appear in your manuscript."
             </Drawer>
           </div>
           <MainBody
+            drawerVisible={drawerVisible}
             darkModeTheme={darkMode}
             activeItemId={activeItemId}
             setActiveItemId={setActiveItemId}

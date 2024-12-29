@@ -25,18 +25,20 @@ import Header from "../Header/Header";
 import Charts from "../../../Chart";
 import { FaFileAlt } from "react-icons/fa";
 import ManuscriptDrafts from "../../ManuscriptTabs/ManuscriptDrafts";
+import CreatedManuscript from "../../ManuscriptTabs/CreatedManuscript";
+import News from "../News/News";
 
-const MainBody = ({ darkModeTheme, activeItemId, setActiveItemId }) => {
+const MainBody = ({
+  darkModeTheme,
+  activeItemId,
+  setActiveItemId,
+  drawerVisible,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showDashboard, setShowDashboard] = useState(true);
   const [visibleComponent, setVisibleComponent] = useState("dashboard");
   const [showManuscriptDraft, setShowManuscriptDraft] = useState(false);
-  const drafts = [
-    { id: 1, name: "Draft One" },
-    { id: 2, name: "Draft Two" },
-    { id: 3, name: "Draft Three" },
-    { id: 4, name: "Draft Four" },
-  ];
+
   useEffect(() => {
     switch (activeItemId) {
       case "1":
@@ -44,6 +46,12 @@ const MainBody = ({ darkModeTheme, activeItemId, setActiveItemId }) => {
         break;
       case "2":
         setVisibleComponent("manuscriptDraft");
+        break;
+      case "3":
+        setVisibleComponent("createdManuscript");
+        break;
+      case "5":
+        setVisibleComponent("news");
         break;
       default:
         setVisibleComponent("");
@@ -946,10 +954,19 @@ const MainBody = ({ darkModeTheme, activeItemId, setActiveItemId }) => {
         </div>
       )}
       {visibleComponent === "manuscriptDraft" && (
-        // <div className="ManuscriptDraft" style={{ height: "100vh" }}>
-        //   {/* Manuscript Draft content goes here */}
-        // </div>
-        <ManuscriptDrafts darkModeTheme={darkModeTheme} />
+        <ManuscriptDrafts
+          darkModeTheme={darkModeTheme}
+          drawerVisible={drawerVisible}
+        />
+      )}
+      {visibleComponent === "createdManuscript" && (
+        <CreatedManuscript
+          darkModeTheme={darkModeTheme}
+          drawerVisible={drawerVisible}
+        />
+      )}
+      {visibleComponent === "news" && (
+        <News darkModeTheme={darkModeTheme} drawerVisible={drawerVisible} />
       )}
     </div>
   );
