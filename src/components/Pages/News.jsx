@@ -2,8 +2,10 @@ import React from "react";
 import { Card, Avatar, Badge } from "antd";
 // import "bootstrap/dist/css/bootstrap.min.css";
 import "./NewsComponent.css"; // Add your custom styles
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
+import { Spin } from "antd";
+
 import {
   FaCalendarAlt,
   FaClock,
@@ -21,72 +23,40 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import VolumeList from "../VolumeItem";
+import apiClient from "../../utility/apiClient";
 
 const { Meta } = Card;
 
-const newsData = [
-  {
-    id: 1,
-    title: "Police Arrested More Than 11000 People At Protests Across The US",
-    description:
-      "Markdown is a lightweight markup language with plain-text formatting syntax. Its design allows it to...",
-    author: "Jane Smith",
-    date: "2024-12-24",
-    readingTime: "2 min",
-    image: "https://via.placeholder.com/600x400",
-    avatar: "https://via.placeholder.com/100",
-  },
-  {
-    id: 2,
-    title:
-      "A Cop Who Said Let's Start A Riot In An Instagram Post Has Been Fired",
-    description:
-      "Lorem markdownum transique nondum, Peliaeque at poterat exegit, urbis quo; tibi. Cursus mecum adit...",
-    author: "John Doe",
-    date: "2024-12-23",
-    readingTime: "1 min",
-    image: "https://via.placeholder.com/600x400",
-    avatar: "https://via.placeholder.com/100",
-  },
-  {
-    id: 3,
-    title: "A Lot Of Celebrities Are Being Useless Right Now",
-    description:
-      "Lorem markdownum illic venturi instructa nobis Echidnae, cum quid magna fatebor. Levat placetque...",
-    author: "Steve Grant",
-    date: "2024-12-22",
-    readingTime: "1 min",
-    image: "https://via.placeholder.com/600x400",
-    avatar: "https://via.placeholder.com/100",
-  },
-  {
-    id: 4,
-    title: "New Discovery In Space Technology",
-    description:
-      "Researchers announced groundbreaking advancements in space exploration technology...",
-    author: "Emily Rose",
-    date: "2024-12-20",
-    readingTime: "3 min",
-    image: "https://via.placeholder.com/600x400",
-    avatar: "https://via.placeholder.com/100",
-  },
-];
+// const newsData = [
+//   {
+//     id: 1,
+//     title: "Police Arrested More Than 11000 People At Protests Across The US",
+//     description:
+//       "Markdown is a lightweight markup language with plain-text formatting syntax. Its design allows it to...",
+//     author: "Jane Smith",
+//     date: "2024-12-24",
+//     readingTime: "2 min",
+//     image: "https://via.placeholder.com/600x400",
+//     avatar: "https://via.placeholder.com/100",
+//   },
+
+// ];
 
 function NewsComponent() {
-  const sortedNews = newsData.sort(
-    (a, b) => new Date(b.date) - new Date(a.date)
-  );
-  const latestNews = sortedNews.slice(0, 3);
-  const otherNews = sortedNews.slice(3);
+  const [newsData, setNewsData] = useState([]);
+  const [latestNews, setLatestNews] = useState([]);
+  const [otherNews, setOtherNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const controls = useAnimation();
   const controls2 = useAnimation();
   const [ref, inView] = useInView({
-    triggerOnce: false, // Animation triggers every time the section comes into view
-    threshold: 0.2, // Adjust the threshold as needed
+    triggerOnce: false,
+    threshold: 0.2,
   });
   const [ref2, inView2] = useInView({
-    triggerOnce: false, // Animation triggers every time the section comes into view
-    threshold: 0.2, // Adjust the threshold as needed
+    triggerOnce: false,
+    threshold: 0.2,
   });
 
   useEffect(() => {
@@ -102,7 +72,6 @@ function NewsComponent() {
     }
   }, [controls, inView, controls2, inView2]);
 
-  // Animations for the section when it comes in view and out of view
   const sectionVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -120,7 +89,6 @@ function NewsComponent() {
     },
   };
 
-  // Animation for the card hover effect
   const cardHoverVariants = {
     hover: {
       scale: 1.05,
@@ -307,7 +275,11 @@ function NewsComponent() {
                   className="card-img-top position-relative"
                   style={{
                     height: "550px",
-                    backgroundImage: `url(${item.img})`,
+                    backgroundImage: `url(${
+                      item.imagee
+                        ? item.image
+                        : "https://img.freepik.com/free-vector/digital-futuristic-earth-technology-background-with-glowing-lights_1017-23327.jpg?t=st=1735655793~exp=1735659393~hmac=1282ebb05c6e837c8f830796b3ff114d61eeb6a4325d34830d841a0f2585ce7a&w=1800"
+                    })`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     position: "relative",
@@ -343,7 +315,17 @@ function NewsComponent() {
                     {item.title}
                   </h5>
                   <p className="card-text" style={{ color: "white" }}>
-                    {item.date} • {item.time}
+                    {new Date(item.created_at).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    •{" "}
+                    {new Date(item.created_at).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
                   </p>
                   <div
                     style={{
@@ -354,7 +336,10 @@ function NewsComponent() {
                     }}
                   >
                     <img
-                      src={item.authorImage}
+                      src={
+                        item.authorImage ||
+                        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp"
+                      }
                       alt={item.author}
                       style={{
                         width: "50px",
@@ -364,9 +349,11 @@ function NewsComponent() {
                       }}
                     />
                     <div>
-                      <div style={{ fontWeight: "700" }}>{item.author}</div>
-                      <span>{item.date}</span>
-                      <span> • {item.time}</span>
+                      <div style={{ fontWeight: "700" }}>
+                        {item.created_by.username}
+                      </div>
+                      <span>{item.created_by.email}</span>
+                      <span></span>
                     </div>
                   </div>
                 </div>
@@ -377,18 +364,49 @@ function NewsComponent() {
       </div>
     );
   };
+  useEffect(() => {
+    const fetchNewsData = async () => {
+      try {
+        const response = await apiClient.get("/news/news");
+        const sortedNews = response.data.news.sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        const latestNews = sortedNews.slice(0, 4);
+        setLatestNews(latestNews);
+        const otherNews = sortedNews.slice(4);
+        setOtherNews(otherNews);
+        console.log("Latest", latestNews);
+        console.log("Other", otherNews);
+
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching news data", error);
+        setLoading(false);
+      }
+    };
+
+    fetchNewsData();
+  }, []);
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <Spin size="large" tip="Loading..." />
+      </div>
+    );
+  }
 
   return (
     <div className="journal-container container py-5">
       <div className="row">
         {/* Featured Section */}
-        <FeaturedCarousel featuredData={featuredData} />
+        <FeaturedCarousel featuredData={latestNews} />
       </div>
 
       <div className="row">
         {/* Top Stories */}
         <div className="col-lg-8 mb-4">
-          <h4 className="mb-3 section-header">Top Stories</h4>
+          <h4 className="mb-3 section-header">Other News</h4>
           <motion.div
             className="row"
             ref={ref}
@@ -396,7 +414,7 @@ function NewsComponent() {
             initial="hidden"
             animate={controls}
           >
-            {topStories.map((story, index) => (
+            {otherNews.map((story, index) => (
               <motion.div className="col-md-12 mb-4" key={index}>
                 <motion.div
                   className="card d-flex flex-row align-items-center"
@@ -412,7 +430,11 @@ function NewsComponent() {
                 >
                   {/* Image Section */}
                   <img
-                    src={story.img}
+                    // src={story.img}
+                    src={
+                      story.imagee ||
+                      "https://img.freepik.com/free-vector/digital-futuristic-earth-technology-background-with-glowing-lights_1017-23327.jpg?t=st=1735655793~exp=1735659393~hmac=1282ebb05c6e837c8f830796b3ff114d61eeb6a4325d34830d841a0f2585ce7a&w=1800"
+                    }
                     alt={story.title}
                     style={{
                       width: "40%",
@@ -436,7 +458,7 @@ function NewsComponent() {
                         marginBottom: "10px",
                       }}
                     >
-                      {story.category}
+                      News
                     </div>
                     <h5
                       className="card-title"
@@ -448,6 +470,19 @@ function NewsComponent() {
                     >
                       {story.title}
                     </h5>
+                    <p className="card-text" style={{}}>
+                      {new Date(story.created_at).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}{" "}
+                      •{" "}
+                      {new Date(story.created_at).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
+                    </p>
                     <p
                       className="card-text"
                       style={{
@@ -467,8 +502,12 @@ function NewsComponent() {
                       }}
                     >
                       <img
-                        src={story.authorImage}
-                        alt={story.author}
+                        // src={story.authorImage}
+                        src={
+                          story.authorImage ||
+                          "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp"
+                        }
+                        alt={story.created_by.username}
                         style={{
                           width: "50px",
                           height: "50px",
@@ -477,9 +516,11 @@ function NewsComponent() {
                         }}
                       />
                       <div>
-                        <div style={{ fontWeight: "700" }}>{story.author}</div>
-                        <span>{story.date}</span>
-                        <span> • {story.time}</span>
+                        <div style={{ fontWeight: "700" }}>
+                          {story.created_by.username}
+                        </div>
+                        <span>{story.created_by.email}</span>
+                        <span></span>
                       </div>
                     </div>
                   </div>
@@ -487,16 +528,6 @@ function NewsComponent() {
               </motion.div>
             ))}
           </motion.div>
-        </div>
-
-        {/* Publication Info Section */}
-        <div className="col-lg-4 mb-4">
-          <h4 className="mb-3 section-header">Journal Archieve</h4>
-          <div className="card shadow border-0">
-            <div className="card-body">
-              <VolumeList />
-            </div>
-          </div>
         </div>
       </div>
     </div>
