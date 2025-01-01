@@ -72,7 +72,7 @@ function Header({ show }) {
               </button>
 
               <div
-                className="navbar-collapse collapse show"
+                className="navbar-collapse collapse"
                 id="navbarSupportedContent"
               >
                 <ul className="navbar-nav mr-auto">
@@ -178,7 +178,7 @@ function Header({ show }) {
                           }}
                         >
                           <li>
-                            <a className="dropdown-item" href="/author">
+                            <a className="dropdown-item" href="/dashboard">
                               Submit Manuscript
                             </a>
                           </li>
@@ -205,7 +205,7 @@ function Header({ show }) {
               </div>
               {isAuth ? (
                 <div className="btn-sing d-none d-sm-block active flex">
-                  <a className="btn btn-border page-scroll" href="/author">
+                  <a className="btn btn-border page-scroll" href="/dashboard">
                     dashboard
                   </a>
                 </div>

@@ -11,72 +11,11 @@ import {
   Rectangle,
 } from "recharts";
 import "./chart.css";
+import { decryptData } from "../utility/authUtils";
+import apiClient from "../utility/apiClient";
 
 const colors = [
   "linear-gradient(180deg, #34CAA5 0%, rgba(52, 202, 165, 0.00) 100%)",
-];
-
-const data = [
-  {
-    name: "Jan",
-    uv: "6",
-    tickCount: 5,
-  },
-  {
-    name: "Feb",
-    uv: "15",
-    tickCount: 10,
-  },
-  {
-    name: "Mar",
-    uv: "12",
-    tickCount: 15,
-  },
-  {
-    name: "Apr",
-    uv: "25",
-    tickCount: 20,
-  },
-  {
-    name: "May",
-    uv: "18",
-    tickCount: 25,
-  },
-  {
-    name: "Jun",
-    uv: "45",
-    tickCount: 30,
-  },
-  {
-    name: "Jul",
-    uv: "28",
-    tickCount: 30,
-  },
-  {
-    name: "Aug",
-    uv: "20",
-    tickCount: 40,
-  },
-  {
-    name: "Sep",
-    uv: "30",
-    tickCount: 45,
-  },
-  {
-    name: "Oct",
-    uv: "7",
-    tickCount: 50,
-  },
-  {
-    name: "Nov",
-    uv: "30",
-    tickCount: 55,
-  },
-  {
-    name: "Dec",
-    uv: "25",
-    tickCount: 60,
-  },
 ];
 
 const CustomYAxisTick = ({ x, y, payload, darkModeTheme }) => {
@@ -111,7 +50,7 @@ const CustomTooltip = ({ active, payload }) => {
     return (
       <div className="custom-tooltip" style={{ fontSize: "12px" }}>
         <div className="arrow-down"></div>
-        <p className="uv" style={{ color: "white" }}>{`$ ${uv}`}</p>
+        <p className="uv" style={{ color: "white" }}>{`${uv}`}</p>
       </div>
     );
   }
@@ -142,9 +81,18 @@ const GradientBar = ({ fill, x, y, width, height }) => {
   );
 };
 
-export default function Charts({ darkModeTheme }) {
+export default function Charts({ darkModeTheme, refresh }) {
   const [chartHeight, setChartHeight] = useState(300);
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(true);
+  const [visibleComponent, setVisibleComponent] = useState("dashboard");
+  const [showManuscriptDraft, setShowManuscriptDraft] = useState(false);
+  const [fetching, setFetching] = useState();
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -172,6 +120,38 @@ export default function Charts({ darkModeTheme }) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
+  useEffect(() => {
+    fetchManuscriptsGraphInfo();
+  }, [refresh]);
+  const fetchManuscriptsGraphInfo = async () => {
+    setFetching(true);
+    const storedToken = localStorage.getItem("refreshToken");
+    const storedUser = localStorage.getItem("user");
+
+    try {
+      if (storedToken && storedUser) {
+        setToken(decryptData(storedToken));
+        const id = JSON.parse(decryptData(storedUser)).id;
+
+        console.log("User", id);
+        const response = await apiClient.get("/manuscriptsbyuser", {
+          params: {
+            created_by: id,
+          },
+        });
+
+        if (response.status === 200) {
+          console.log(response);
+          console.log("Graph Data", response);
+          setData(response.data.data);
+        }
+      }
+      setFetching(false);
+    } catch (error) {
+      console.error("Error fetching manuscripts:", error.message);
+      setFetching(false);
+    }
+  };
 
   return (
     <ResponsiveContainer

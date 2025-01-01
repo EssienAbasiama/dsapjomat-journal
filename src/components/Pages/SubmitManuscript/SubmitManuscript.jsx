@@ -71,7 +71,11 @@ function SubmitManuscript() {
   const [reviewerData, setTableReviewerData] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState();
-  const [collectedData, setCollectedData] = useState({});
+  const [collectedData, setCollectedData] = useState(() => {
+    const draft = localStorage.getItem("manuscriptDraft");
+    return draft ? JSON.parse(draft) : {};
+  });
+
   const [subjects, setSubjects] = useState([
     "Physics",
     "Mathematics",
@@ -172,6 +176,7 @@ function SubmitManuscript() {
       console.log("res", response);
       if (response.status === 200) {
         const user = response.data.user;
+        console.log("Author User", user);
         message.success("User found!");
         setTableData((prevData) => [...prevData, user]);
         form.setFieldsValue({ email: "" });
@@ -347,62 +352,110 @@ function SubmitManuscript() {
       message.error("Error: Failed to add department");
     }
   };
+  console.log("CollectedDate", collectedData);
   const manuscriptData = [
     {
       key: "1",
       field: "Manuscript ID",
-      value: "dfvd",
+      value: "***",
     },
     {
       key: "2",
       field: "Manuscript Title",
-      value: "Research Paper",
+      value: collectedData.full_title,
     },
     {
       key: "3",
-      field: "Main Subjects",
-      value: "Biochemical engineering / Biomaterials",
+      field: "Running Title",
+      value: (
+        <div
+          dangerouslySetInnerHTML={{ __html: collectedData.running_title }}
+        />
+      ),
     },
     {
       key: "4",
-      field: "Abstract",
-      value:
-        "Insert abstract text here with long content as shown in the screenshots.",
+      field: "Manuscript Type",
+      value: collectedData.manuscript_type,
     },
     {
       key: "5",
+      field: "Comments",
+      value: (
+        <div dangerouslySetInnerHTML={{ __html: collectedData.comments }} />
+      ),
+    },
+    {
+      key: "6",
+      field: "Main Subjects",
+      value: collectedData.subjects.join(", "),
+    },
+
+    {
+      key: "7",
+      field: "More Subject",
+      value: (
+        <div dangerouslySetInnerHTML={{ __html: collectedData.moreSubject }} />
+      ),
+    },
+    {
+      key: "8",
+      field: "Abstract",
+      value: (
+        <div
+          dangerouslySetInnerHTML={{ __html: collectedData.abstract_text }}
+        />
+      ),
+    },
+
+    {
+      key: "9",
       field: "Keywords",
-      value: "Insert keywords here.",
+      value: collectedData.tags.join(", "),
+    },
+    {
+      key: "10",
+      field: "Cover Letter",
+      value: (
+        <div dangerouslySetInnerHTML={{ __html: collectedData.cover_letter }} />
+      ),
     },
   ];
 
-  const authorsData = [
-    {
-      key: "1",
-      name: "Essien, Abasiama",
-      email: "essienabasiama11@gmail.com",
-      degree: "BSc",
-      position: "Professor",
-      phone: "09036894661",
-      country: "Nigeria",
-      affiliation: "Add Affiliation Here",
-    },
-  ];
+  // const authorsData = [
+  //   {
+  //     key: "1",
+  //     name: "Essien, Abasiama",
+  //     email: "essienabasiama11@gmail.com",
+  //     degree: "BSc",
+  //     position: "Professor",
+  //     phone: "09036894661",
+  //     country: "Nigeria",
+  //     affiliation: "Add Affiliation Here",
+  //   },
+  // ];
+  const authorsData = collectedData.co_authors;
+  const suggestedReviewers = collectedData.suggestedReviewers;
 
-  const filesData = [
-    {
-      key: "1",
-      fileType: "Manuscript Main File",
-      fileName: "Module 1.docx",
-      size: "24.29 KB",
-    },
-    {
-      key: "2",
-      fileType: "Title Page",
-      fileName: "Editor_030943.docx",
-      size: "12.26 KB",
-    },
-  ];
+  // const filesData = [
+  //   {
+  //     key: "1",
+  //     fileType: "Manuscript Main File",
+  //     fileName: "Module 1.docx",
+  //     size: "24.29 KB",
+  //   },
+  //   {
+  //     key: "2",
+  //     fileType: "Title Page",
+  //     fileName: "Editor_030943.docx",
+  //     size: "12.26 KB",
+  //   },
+  // ];
+  // const filesData = collectedData.files.fileList;
+  const filesData = collectedData.files.fileList.map((file) => ({
+    ...file,
+    size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+  }));
 
   const handleSubmit = async () => {
     setSending(true);
@@ -1356,13 +1409,18 @@ These comments will not appear in your manuscript."
 
             <Divider />
 
-            <Typography.Title level={5}>Authors</Typography.Title>
+            <Typography.Title level={5}>Co-Authors</Typography.Title>
             <Table
               dataSource={authorsData}
               columns={[
                 {
+                  title: "Title",
+                  dataIndex: "title",
+                  key: "title",
+                },
+                {
                   title: "Name",
-                  dataIndex: "name",
+                  dataIndex: "username",
                   key: "name",
                 },
                 {
@@ -1376,9 +1434,9 @@ These comments will not appear in your manuscript."
                   key: "degree",
                 },
                 {
-                  title: "Position",
-                  dataIndex: "position",
-                  key: "position",
+                  title: "Specialty",
+                  dataIndex: "specialty",
+                  key: "specialty",
                 },
                 {
                   title: "Phone",
@@ -1390,11 +1448,6 @@ These comments will not appear in your manuscript."
                   dataIndex: "country",
                   key: "country",
                 },
-                {
-                  title: "Affiliation",
-                  dataIndex: "affiliation",
-                  key: "affiliation",
-                },
               ]}
               pagination={false}
               bordered
@@ -1403,18 +1456,64 @@ These comments will not appear in your manuscript."
 
             <Divider />
 
-            <Typography.Title level={5}>Files</Typography.Title>
+            <Typography.Title level={5}>Suggested Reviewers</Typography.Title>
+            <Table
+              dataSource={suggestedReviewers}
+              columns={[
+                {
+                  title: "Title",
+                  dataIndex: "title",
+                  key: "title",
+                },
+                {
+                  title: "Name",
+                  dataIndex: "username",
+                  key: "name",
+                },
+                {
+                  title: "Email Address",
+                  dataIndex: "email",
+                  key: "email",
+                },
+                {
+                  title: "Degree",
+                  dataIndex: "degree",
+                  key: "degree",
+                },
+                {
+                  title: "Specialty",
+                  dataIndex: "specialty",
+                  key: "specialty",
+                },
+                {
+                  title: "Phone",
+                  dataIndex: "phone",
+                  key: "phone",
+                },
+                {
+                  title: "Country",
+                  dataIndex: "country",
+                  key: "country",
+                },
+              ]}
+              pagination={false}
+              bordered
+              size="small"
+            />
+            <Divider />
+
+            <Typography.Title level={5}>Attached Files</Typography.Title>
             <Table
               dataSource={filesData}
               columns={[
                 {
                   title: "File Type",
-                  dataIndex: "fileType",
+                  dataIndex: "type",
                   key: "fileType",
                 },
                 {
                   title: "File Name",
-                  dataIndex: "fileName",
+                  dataIndex: "name",
                   key: "fileName",
                 },
                 {
@@ -1441,26 +1540,49 @@ These comments will not appear in your manuscript."
   };
 
   const handleSaveDraft = async () => {
+    setSending(true);
     try {
-      const drafted_at = new Date().toISOString();
+      const created_at = new Date().toISOString();
+      let updatedData = { ...collectedData, created_at };
+
+      // If it's not a draft, update the data for submission
       if (current === 10) {
-        const updatedData = {
-          ...collectedData,
-          drafted_at,
+        updatedData = {
+          ...updatedData,
+          drafted_at: null,
           isDraft: true,
         };
-
-        // Save to state
-        setCollectedData(updatedData);
-        // Save to localStorage
-        localStorage.setItem("manuscriptDraft", JSON.stringify(updatedData));
       }
-      message.success("Job opening created successfully");
-      form.resetFields();
-      setCurrent(0);
+
+      const files = updatedData.files.fileList; // Get the uploaded files from the form
+      console.log("Files", files);
+      if (files && files.length > 0) {
+        updatedData.files = files.map((file) => file.originFileObj);
+      } else {
+        updatedData.files = [];
+      }
+
+      console.log("Payload", updatedData);
+      // Save the manuscript data by making the POST request
+      const response = await saveManuscriptDraft(updatedData);
+
+      if (response.success) {
+        // If the manuscript is saved successfully
+        message.success("Manuscript Draft saved successfully");
+        form.resetFields();
+        setCurrent(0);
+        setCollectedData({}); // Reset the collected data after success
+        localStorage.removeItem("manuscriptDraft"); // Optional: Remove draft from localStorage if saved
+      } else {
+        // If there was an error in saving the manuscript
+        message.error(`Failed to save manuscript: ${response.error}`);
+      }
+
       setSending(false);
     } catch (error) {
-      message.error("Failed to save draft");
+      console.log(error);
+      setSending(false);
+      message.error("Failed to save manuscript");
     }
   };
   const [activeItemId, setActiveItemId] = useState("1");

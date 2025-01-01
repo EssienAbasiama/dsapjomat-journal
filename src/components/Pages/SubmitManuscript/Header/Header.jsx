@@ -126,7 +126,10 @@ const JournalHeader = ({ darkModeTheme }) => {
           </svg>
         </div>
         <div className="profile">
-          <img src={Profile} />
+          <img
+            style={{ height: "40px", width: "40px", borderRadius: "100%" }}
+            src="https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp"
+          />
 
           <div className="profile_details">
             <p
@@ -134,7 +137,7 @@ const JournalHeader = ({ darkModeTheme }) => {
                 darkModeTheme ? "header-text-dark-mode" : "light-name"
               }`}
             >
-              {user?.username ? "Justin Bergson" : user?.username}
+              {user?.username ? user?.username : "Justin Bergson"}
             </p>
             <p className="email">{user?.email}</p>
           </div>

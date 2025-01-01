@@ -8,7 +8,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   useLocation,
   Navigate,
   Outlet,
@@ -21,32 +20,30 @@ import SubmitManuscript from "./components/Pages/SubmitManuscript/SubmitManuscri
 import EditorialBoard from "./components/Pages/EditorialBoard";
 import NewsComponent from "./components/Pages/News";
 import { isAuthenticated } from "./utility/authUtils";
+import MobileMessage from "./components/Pages/Error/MobileMessage";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
-  const [isAuth, setIsAuth] = useState(null); // Initially null to handle loading state
+  const [isAuth, setIsAuth] = useState(null);
   const location = useLocation();
-  console.log("Auth", isAuth);
+
   useEffect(() => {
     const checkAuth = async () => {
-      const authStatus = await isAuthenticated(); // Check if the user is authenticated
-      setIsAuth(authStatus); // Update state based on the result
+      const authStatus = await isAuthenticated();
+      setIsAuth(authStatus);
     };
 
     checkAuth();
   }, []);
 
-  // While authentication status is being determined, render nothing or a loader
   if (isAuth === null) {
-    return <div>Loading...</div>; // Replace with a loading spinner if needed
+    return <div>Loading...</div>;
   }
 
-  // If not authenticated, redirect to login
   if (!isAuth) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 
-  // If authenticated, render children or the Outlet for nested routes
   return children ? children : <Outlet />;
 };
 
@@ -60,8 +57,35 @@ function App() {
 
 function AppWithHeader() {
   const location = useLocation();
-  const isExcludedRoute = location.pathname === "/author";
+  const isExcludedRoute = location.pathname === "/dashboard";
+
   const isHome = location.pathname === "/";
+  const [isMobile, setIsMobile] = useState(false);
+  // Define public routes
+  const publicRoutes = ["/", "/login", "/register", "/contact-us", "/about-us"];
+  const isPublicRoute = publicRoutes.includes(location.pathname);
+
+  // Check if the device is mobile based on screen width
+  useEffect(() => {
+    const checkDeviceWidth = () => {
+      if (window.innerWidth <= 768) {
+        setIsMobile(true);
+      } else {
+        setIsMobile(false);
+      }
+    };
+
+    // Call the function on load and resize
+    checkDeviceWidth();
+    window.addEventListener("resize", checkDeviceWidth);
+
+    // Cleanup event listener on unmount
+    return () => window.removeEventListener("resize", checkDeviceWidth);
+  }, []);
+
+  if (isMobile && !isPublicRoute) {
+    return <MobileMessage />;
+  }
 
   return (
     <>
@@ -74,13 +98,16 @@ function AppWithHeader() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/about-us" element={<About />} />
 
-        {/* Protected Routes (Wrapped with ProtectedRoute) */}
+        {/* Protected Routes */}
         <Route element={<ProtectedRoute />}>
           <Route path="/journal" element={<Journal />} />
           <Route path="/editorial-board" element={<EditorialBoard />} />
-          <Route path="/author" element={<SubmitManuscript />} />
+          <Route path="/dashboard" element={<SubmitManuscript />} />
           <Route path="/news" element={<NewsComponent />} />
         </Route>
+
+        {/* Redirect to mobile message page */}
+        <Route path="/mobile-message" element={<MobileMessage />} />
       </Routes>
       {!isExcludedRoute && <Footer />}
     </>

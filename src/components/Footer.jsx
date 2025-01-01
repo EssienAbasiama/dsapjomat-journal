@@ -38,10 +38,10 @@ const Footer = () => {
               className="col-lg-3 col-md-6 col-sm-12 col-xs-12 wow fadeInUp"
               data-wow-delay="0.4s"
             >
-              <h3 className="footer-title">Company</h3>
+              <h3 className="footer-title">Organisations</h3>
               <ul>
                 <li>
-                  <a href="#">Press Releases</a>
+                  <a href="/news">News</a>
                 </li>
                 <li>
                   <a href="#">Mission</a>
@@ -63,7 +63,7 @@ const Footer = () => {
                   <a href="#">Career</a>
                 </li>
                 <li>
-                  <a href="#">Team</a>
+                  <a href="/editorial-board">Editorial Board</a>
                 </li>
                 <li>
                   <a href="#">Clients</a>
