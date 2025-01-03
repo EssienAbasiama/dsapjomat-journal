@@ -173,10 +173,9 @@ function SubmitManuscript() {
         email,
       });
 
-      console.log("res", response);
       if (response.status === 200) {
         const user = response.data.user;
-        console.log("Author User", user);
+
         message.success("User found!");
         setTableData((prevData) => [...prevData, user]);
         form.setFieldsValue({ email: "" });
@@ -211,7 +210,6 @@ function SubmitManuscript() {
         email,
       });
 
-      console.log("res", response);
       if (response.status === 200) {
         const user = response.data.user;
         message.success("Reviewer found!");
@@ -236,7 +234,6 @@ function SubmitManuscript() {
   };
   const handleChange = (value) => {
     setSelectedSubjects(value);
-    console.log("Selected subjects:", value);
   };
 
   useEffect(() => {
@@ -282,17 +279,15 @@ function SubmitManuscript() {
 
         // Save to localStorage
         localStorage.setItem("manuscriptDraft", JSON.stringify(updatedData));
-        console.log("curr", current);
+
         if (current === 7 && reviewerData.length < 3) {
           message.error("Select at least 3 reviewers");
-          console.log("Less than");
+
           return;
         }
 
         // Move to the next step
         setCurrent(current + 1);
-
-        console.log("Updated Data:", updatedData);
       })
       .catch((info) => {
         console.log("Validation Failed:", info);
@@ -352,7 +347,7 @@ function SubmitManuscript() {
       message.error("Error: Failed to add department");
     }
   };
-  console.log("CollectedDate", collectedData);
+
   const manuscriptData = [
     {
       key: "1",
@@ -362,40 +357,43 @@ function SubmitManuscript() {
     {
       key: "2",
       field: "Manuscript Title",
-      value: collectedData.full_title,
+      value: collectedData?.full_title,
     },
     {
       key: "3",
       field: "Running Title",
       value: (
         <div
-          dangerouslySetInnerHTML={{ __html: collectedData.running_title }}
+          dangerouslySetInnerHTML={{ __html: collectedData?.running_title }}
         />
       ),
     },
     {
       key: "4",
       field: "Manuscript Type",
-      value: collectedData.manuscript_type,
+      value: collectedData?.manuscript_type,
     },
     {
       key: "5",
       field: "Comments",
       value: (
-        <div dangerouslySetInnerHTML={{ __html: collectedData.comments }} />
+        <div dangerouslySetInnerHTML={{ __html: collectedData?.comments }} />
       ),
     },
     {
       key: "6",
       field: "Main Subjects",
-      value: collectedData.subjects.join(", "),
+      // value: collectedData?.subjects.join(", "),
+      value: Array.isArray(collectedData?.subjects)
+        ? collectedData.subjects.join(", ")
+        : "",
     },
 
     {
       key: "7",
       field: "More Subject",
       value: (
-        <div dangerouslySetInnerHTML={{ __html: collectedData.moreSubject }} />
+        <div dangerouslySetInnerHTML={{ __html: collectedData?.moreSubject }} />
       ),
     },
     {
@@ -403,7 +401,7 @@ function SubmitManuscript() {
       field: "Abstract",
       value: (
         <div
-          dangerouslySetInnerHTML={{ __html: collectedData.abstract_text }}
+          dangerouslySetInnerHTML={{ __html: collectedData?.abstract_text }}
         />
       ),
     },
@@ -411,48 +409,27 @@ function SubmitManuscript() {
     {
       key: "9",
       field: "Keywords",
-      value: collectedData.tags.join(", "),
+      // value: collectedData?.tags.join(", "),
+      value: Array.isArray(collectedData?.tags)
+        ? collectedData.tags.join(", ")
+        : "",
     },
     {
       key: "10",
       field: "Cover Letter",
       value: (
-        <div dangerouslySetInnerHTML={{ __html: collectedData.cover_letter }} />
+        <div
+          dangerouslySetInnerHTML={{ __html: collectedData?.cover_letter }}
+        />
       ),
     },
   ];
 
-  // const authorsData = [
-  //   {
-  //     key: "1",
-  //     name: "Essien, Abasiama",
-  //     email: "essienabasiama11@gmail.com",
-  //     degree: "BSc",
-  //     position: "Professor",
-  //     phone: "09036894661",
-  //     country: "Nigeria",
-  //     affiliation: "Add Affiliation Here",
-  //   },
-  // ];
-  const authorsData = collectedData.co_authors;
-  const suggestedReviewers = collectedData.suggestedReviewers;
+  const authorsData = collectedData?.co_authors;
+  const suggestedReviewers = collectedData?.suggestedReviewers;
 
-  // const filesData = [
-  //   {
-  //     key: "1",
-  //     fileType: "Manuscript Main File",
-  //     fileName: "Module 1.docx",
-  //     size: "24.29 KB",
-  //   },
-  //   {
-  //     key: "2",
-  //     fileType: "Title Page",
-  //     fileName: "Editor_030943.docx",
-  //     size: "12.26 KB",
-  //   },
-  // ];
   // const filesData = collectedData.files.fileList;
-  const filesData = collectedData.files.fileList.map((file) => ({
+  const filesData = collectedData?.files?.fileList?.map((file) => ({
     ...file,
     size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
   }));
@@ -472,25 +449,43 @@ function SubmitManuscript() {
         };
       }
 
-      const files = updatedData.files.fileList; // Get the uploaded files from the form
-      console.log("Files", files);
+      const files = updatedData.files?.fileList;
+
+      const formData = new FormData();
+
+      // Append form data (excluding files)
+      Object.keys(updatedData).forEach((key) => {
+        if (key !== "files") formData.append(key, updatedData[key]);
+      });
+      if (updatedData.co_authors) {
+        formData.delete("co_authors");
+        formData.append("co_authors", JSON.stringify(updatedData.co_authors));
+      }
+      if (updatedData.suggestedReviewers) {
+        formData.delete("suggestedReviewers");
+        formData.append(
+          "suggestedReviewers",
+          JSON.stringify(updatedData.suggestedReviewers)
+        );
+      }
+      // If files are present, append them to FormData
       if (files && files.length > 0) {
-        updatedData.files = files.map((file) => file.originFileObj);
-      } else {
-        updatedData.files = [];
+        files.forEach((file) => {
+          formData.append("files", file.originFileObj); // Append file object to FormData
+        });
       }
 
-      console.log("Payload", updatedData);
+      const fileList = formData.getAll("files");
+
       // Save the manuscript data by making the POST request
-      const response = await saveManuscriptDraft(updatedData);
+      const response = await saveManuscriptDraft(formData);
 
       if (response.success) {
-        // If the manuscript is saved successfully
         message.success("Manuscript saved successfully");
         form.resetFields();
         setCurrent(0);
-        setCollectedData({}); // Reset the collected data after success
-        localStorage.removeItem("manuscriptDraft"); // Optional: Remove draft from localStorage if saved
+        setCollectedData({});
+        localStorage.removeItem("manuscriptDraft");
       } else {
         // If there was an error in saving the manuscript
         message.error(`Failed to save manuscript: ${response.error}`);
@@ -502,18 +497,6 @@ function SubmitManuscript() {
       setSending(false);
       message.error("Failed to save manuscript");
     }
-  };
-
-  const handleOrcidChange = (e) => {
-    const value = e.target.value.replace(/[^\d]/g, ""); // Remove non-numeric characters
-    const formattedValue = value
-      .match(/.{1,4}/g) // Group into chunks of 4 digits
-      ?.join("-") // Join with hyphens
-      .substr(0, 19); // Limit to 19 characters (XXXX-XXXX-XXXX-XXXX)
-
-    setFormData({ ...formData, orcid: formattedValue });
-    setOrcidData(formData.orcid);
-    console.log("Data", formData.orcid);
   };
 
   const handleKeyPress = (event) => {
@@ -1554,25 +1537,43 @@ These comments will not appear in your manuscript."
         };
       }
 
-      const files = updatedData.files.fileList; // Get the uploaded files from the form
-      console.log("Files", files);
+      const files = updatedData.files?.fileList; // Get the uploaded files from the form
+
+      const formData = new FormData();
+
+      // Append form data (excluding files)
+      Object.keys(updatedData).forEach((key) => {
+        if (key !== "files") formData.append(key, updatedData[key]);
+      });
+      if (updatedData.co_authors) {
+        formData.delete("co_authors");
+        formData.append("co_authors", JSON.stringify(updatedData.co_authors));
+      }
+      if (updatedData.suggestedReviewers) {
+        formData.delete("suggestedReviewers");
+        formData.append(
+          "suggestedReviewers",
+          JSON.stringify(updatedData.suggestedReviewers)
+        );
+      }
+      // If files are present, append them to FormData
       if (files && files.length > 0) {
-        updatedData.files = files.map((file) => file.originFileObj);
-      } else {
-        updatedData.files = [];
+        files.forEach((file) => {
+          formData.append("files", file.originFileObj); // Append file object to FormData
+        });
       }
 
-      console.log("Payload", updatedData);
+      const fileList = formData.getAll("files");
+
       // Save the manuscript data by making the POST request
-      const response = await saveManuscriptDraft(updatedData);
+      const response = await saveManuscriptDraft(formData);
 
       if (response.success) {
-        // If the manuscript is saved successfully
-        message.success("Manuscript Draft saved successfully");
+        message.success("Manuscript saved to Draft!");
         form.resetFields();
         setCurrent(0);
-        setCollectedData({}); // Reset the collected data after success
-        localStorage.removeItem("manuscriptDraft"); // Optional: Remove draft from localStorage if saved
+        setCollectedData({});
+        localStorage.removeItem("manuscriptDraft");
       } else {
         // If there was an error in saving the manuscript
         message.error(`Failed to save manuscript: ${response.error}`);
@@ -1585,6 +1586,7 @@ These comments will not appear in your manuscript."
       message.error("Failed to save manuscript");
     }
   };
+
   const [activeItemId, setActiveItemId] = useState("1");
   return (
     <>

@@ -9,6 +9,7 @@
   align-items: center;
   gap: 5rem;
   position: fixed;
+  z-index: 10000;
 }
 /* Light Mode Styles */
 .sidebar-light-mode {

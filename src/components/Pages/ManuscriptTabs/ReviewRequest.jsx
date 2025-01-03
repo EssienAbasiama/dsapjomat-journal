@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+
 import {
   Drawer,
   Steps,
@@ -8,38 +9,65 @@ import {
   Divider,
   Typography,
   Layout,
+  Modal,
+  message,
 } from "antd";
-
 import apiClient from "../../../utility/apiClient";
 import { decryptData } from "../../../utility/authUtils";
 import { DownloadOutlined } from "@ant-design/icons";
 
 const { Content } = Layout;
 
-const { Step } = Steps;
-const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
+const ReviewRequest = ({ darkModeTheme, createdBy, drawerVisible }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [drafts, setDrafts] = useState([]);
   const [fetching, setFetching] = useState();
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isSmallScreen = window.innerWidth <= 767;
   const [authorsData, setAuthorData] = useState([]);
   const [suggestedReviewers, setSuggestedReviewers] = useState([]);
   const [collectedData, setCollectedData] = useState(() => {});
   const [filesData, setFilesData] = useState([]);
   const [drawerVisiblee, setDrawerVisible] = useState(false);
-  const isSmallScreen = window.innerWidth <= 767;
+  const [current, setCurrent] = useState(0);
   const handleDownload = (fileUrl) => {
-    // Create an anchor element for downloading the file
     const link = document.createElement("a");
-    link.href = fileUrl; // Assuming the file path is the URL to the file
-    link.download = fileUrl.split("/").pop(); // The file name is extracted from the URL
+    link.href = fileUrl;
+    link.download = fileUrl.split("/").pop();
     link.click();
   };
-  const [current, setCurrent] = useState(0);
-  const closeDrawer = () => {
-    setDrawerVisible(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [actionType, setActionType] = useState("");
+
+  const showModalConfirmation = (type) => {
+    setActionType(type);
+    setIsModalVisible(true);
+  };
+
+  const handleOk = async () => {
+    console.log(`${actionType} confirmed`);
+    setLoading(true);
+    try {
+      const response = await apiClient.post("/manuscripts/update-status", {
+        id: collectedData.id,
+        status: actionType,
+      });
+
+      message.success(response.data.message);
+      setIsModalVisible(false);
+    } catch (error) {
+      message.error("Failed to update status. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
   const manuscriptData = [
     {
@@ -111,6 +139,7 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
       ),
     },
   ];
+
   const steps = [
     {
       title: "View Manuscript",
@@ -245,7 +274,7 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
                   key: "fileName",
                 },
                 {
-                  title: "Url",
+                  title: "Size",
                   dataIndex: "fileUrl",
                   key: "size",
                 },
@@ -273,7 +302,9 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
       ),
     },
   ];
+
   const showModal = (record) => {
+    console.log("Record", record);
     const transformedRecord = {
       ...record,
       co_authors:
@@ -293,6 +324,8 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
         ? record.tags
         : JSON.parse(record.tags || "[]"),
     };
+    console.log("Transformed Record", transformedRecord);
+
     // Set transformed data
     setCollectedData(transformedRecord);
 
@@ -308,8 +341,8 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
     setFilesData(filesData);
     setDrawerVisible(true);
   };
+
   useEffect(() => {
-    // Load user from secure storage on app load
     const loadUser = async () => {
       setFetching(true);
       const storedToken = localStorage.getItem("refreshToken");
@@ -325,7 +358,8 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
 
     loadUser();
   }, []);
-  const fetchManuscripts = async () => {
+
+  const fetchReviewRequestManuscript = async () => {
     setFetching(true);
     const storedToken = localStorage.getItem("refreshToken");
     const storedUser = localStorage.getItem("user");
@@ -333,19 +367,18 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
     try {
       if (storedToken && storedUser) {
         setToken(decryptData(storedToken));
-        const id = JSON.parse(decryptData(storedUser)).id;
+        const email = JSON.parse(decryptData(storedUser)).email;
 
-        console.log("User", id);
-        const response = await apiClient.get("/manuscripts", {
+        console.log("User", email);
+        const response = await apiClient.get("/getManuscriptsByReviewRequest", {
           params: {
-            created_by: id,
-            isDraft: true,
+            email: email,
           },
         });
 
         if (response.status === 200) {
           console.log(response);
-          setDrafts(response.data.manuscripts); // Update state with fetched data
+          setDrafts(response.data.data); // Update state with fetched data
         }
       }
       setFetching(false);
@@ -356,11 +389,15 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
   };
 
   useEffect(() => {
-    fetchManuscripts();
+    fetchReviewRequestManuscript();
   }, [createdBy, drawerVisible]);
+
   useEffect(() => {
-    fetchManuscripts();
+    fetchReviewRequestManuscript();
   }, []);
+  const closeDrawer = () => {
+    setDrawerVisible(false);
+  };
   const columns = [
     {
       title: "Title",
@@ -491,7 +528,7 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
                 color: darkModeTheme ? "rgb(255, 255, 255)" : "",
               }}
             >
-              Manuscript Drafts
+              Requests
             </h3>
             <div className="sales-trend-header-right">
               <p id="green-link" className="green-link">
@@ -540,12 +577,75 @@ const ManuscriptDrafts = ({ darkModeTheme, createdBy, drawerVisible }) => {
               border: "1px solid #edf2f7",
             }}
           >
+            {collectedData.status === "pending" && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "16px",
+                  marginTop: "16px",
+                  padding: "20px",
+                }}
+              >
+                <button
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#4caf50",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => showModalConfirmation("Approved")}
+                >
+                  Approve
+                </button>
+                <button
+                  style={{
+                    padding: "8px 16px",
+                    backgroundColor: "#f44336",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                  onClick={() => showModalConfirmation("Rejected")}
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+
             {steps[current].content}
           </Card>
         </div>
       </Drawer>
+      <Modal
+        title={`${actionType} Manuscript`}
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={[
+          <Button key="cancel" onClick={handleCancel}>
+            Cancel
+          </Button>,
+          <Button
+            key="confirm"
+            type={actionType === "Approve" ? "primary" : "danger"}
+            onClick={handleOk}
+          >
+            {actionType}
+          </Button>,
+        ]}
+      >
+        <p>
+          Are you sure you want to {actionType.toLowerCase()} this manuscript?
+        </p>
+      </Modal>
     </Layout>
   );
 };
 
-export default ManuscriptDrafts;
+export default ReviewRequest;

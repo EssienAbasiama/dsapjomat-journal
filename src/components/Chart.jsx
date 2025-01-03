@@ -133,7 +133,6 @@ export default function Charts({ darkModeTheme, refresh }) {
         setToken(decryptData(storedToken));
         const id = JSON.parse(decryptData(storedUser)).id;
 
-        console.log("User", id);
         const response = await apiClient.get("/manuscriptsbyuser", {
           params: {
             created_by: id,
@@ -141,8 +140,6 @@ export default function Charts({ darkModeTheme, refresh }) {
         });
 
         if (response.status === 200) {
-          console.log(response);
-          console.log("Graph Data", response);
           setData(response.data.data);
         }
       }
