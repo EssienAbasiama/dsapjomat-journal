@@ -21,6 +21,7 @@ import EditorialBoard from "./components/Pages/EditorialBoard";
 import NewsComponent from "./components/Pages/News";
 import { isAuthenticated } from "./utility/authUtils";
 import MobileMessage from "./components/Pages/Error/MobileMessage";
+import ManuscriptDetails from "./components/Pages/ManuscriptTabs/ManuscriptDetails";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -57,6 +58,7 @@ function App() {
 
 function AppWithHeader() {
   const location = useLocation();
+
   const isExcludedRoute = location.pathname === "/dashboard";
 
   const isHome = location.pathname === "/";
@@ -104,6 +106,8 @@ function AppWithHeader() {
           <Route path="/editorial-board" element={<EditorialBoard />} />
           <Route path="/dashboard" element={<SubmitManuscript />} />
           <Route path="/news" element={<NewsComponent />} />
+          {/* Dynamic Manuscript Route */}
+          <Route path="/manuscripts/:id" element={<ManuscriptDetails />} />
         </Route>
 
         {/* Redirect to mobile message page */}

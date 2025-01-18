@@ -178,11 +178,6 @@ function Header({ show }) {
                           }}
                         >
                           <li>
-                            <a className="dropdown-item" href="/dashboard">
-                              Submit Manuscript
-                            </a>
-                          </li>
-                          <li>
                             <a className="dropdown-item" href="/general-info">
                               Engineering and Technology
                             </a>

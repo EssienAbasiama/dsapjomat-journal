@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 /* eslint-disable no-unused-vars */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { motion, useAnimation } from "framer-motion";
 import {
   FaCalendarAlt,
@@ -14,24 +14,48 @@ import {
   FaGlobe,
 } from "react-icons/fa";
 import { useInView } from "react-intersection-observer";
+import dayjs from "dayjs"; // Install dayjs for date manipulation
 
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
+import { useNavigate } from "react-router-dom";
 import "slick-carousel/slick/slick-theme.css";
 import VolumeList from "../VolumeItem";
+import { decryptData } from "../../utility/authUtils";
+import apiClient from "../../utility/apiClient";
 
 const Journal = () => {
   const controls = useAnimation();
+  const navigate = useNavigate();
+
   const controls2 = useAnimation();
+  const [articleData, setArticleData] = useState([]);
+  const [latestArticles, setLatestArticles] = useState([]);
+  const [fetching, setFetching] = useState();
+  const [user, setUser] = useState(null);
+  const [drafts, setDrafts] = useState([]);
+  const [token, setToken] = useState(null);
+  const [manuscriptThisMonth, setManuscriptThisMonth] = useState([]);
+  const [latestManuscripts, setLatestManuscripts] = useState([]);
+
   const [ref, inView] = useInView({
-    triggerOnce: false, // Animation triggers every time the section comes into view
-    threshold: 0.2, // Adjust the threshold as needed
+    triggerOnce: false,
+    threshold: 0.2,
   });
   const [ref2, inView2] = useInView({
-    triggerOnce: false, // Animation triggers every time the section comes into view
-    threshold: 0.2, // Adjust the threshold as needed
+    triggerOnce: false,
+    threshold: 0.2,
   });
-
+  const goToThisManuscriptDetail = (id) => {
+    console.log("id", id);
+    navigate(`/manuscripts/${id}`);
+  };
+  const handleDownload = (fileUrl) => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.download = fileUrl.split("/").pop();
+    link.click();
+  };
   useEffect(() => {
     if (inView) {
       controls.start("visible");
@@ -44,16 +68,79 @@ const Journal = () => {
       controls2.start("hidden");
     }
   }, [controls, inView, controls2, inView2]);
+  const fetchManuscriptByStatusAndIsDraft = async () => {
+    setFetching(true);
+    const storedToken = localStorage.getItem("refreshToken");
+    const storedUser = localStorage.getItem("user");
 
-  // Animations for the section when it comes in view and out of view
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
+    try {
+      if (storedToken && storedUser) {
+        setToken(decryptData(storedToken));
+        const email = JSON.parse(decryptData(storedUser)).email;
+
+        console.log("User", email);
+        const response = await apiClient.get("/manuscriptsByDraftAndStatus", {
+          params: {
+            status: "Approved",
+            isDraft: false,
+          },
+        });
+
+        if (response.status === 200) {
+          console.log("ApprovedData", response);
+          const manuscripts = response.data.manuscripts;
+
+          // Filter manuscripts created this month
+          const currentMonth = dayjs().month();
+          const currentYear = dayjs().year();
+          const manuscriptsThisMonth = manuscripts.filter((manuscript) => {
+            const createdDate = dayjs(manuscript.created_at);
+            return (
+              createdDate.month() === currentMonth &&
+              createdDate.year() === currentYear
+            );
+          });
+          const latestFourManuscripts = manuscripts
+            .sort((a, b) => dayjs(b.created_at).diff(dayjs(a.created_at)))
+            .slice(0, 4);
+
+          // Log results for debugging
+          console.log("Manuscripts This Month:", manuscriptsThisMonth);
+          console.log("Latest 4 Manuscripts:", latestFourManuscripts);
+
+          setManuscriptThisMonth(manuscriptsThisMonth); // Set the manuscripts created this month
+          setLatestManuscripts(latestFourManuscripts);
+          setDrafts(manuscripts);
+        }
+      }
+
+      setFetching(false);
+    } catch (error) {
+      console.error("Error fetching manuscripts:", error.message);
+      setFetching(false);
+    }
   };
+  useEffect(() => {
+    const loadUser = async () => {
+      setFetching(true);
+      const storedToken = localStorage.getItem("refreshToken");
+      const storedUser = localStorage.getItem("user");
+
+      if (storedToken && storedUser) {
+        setToken(decryptData(storedToken));
+        setUser(JSON.parse(decryptData(storedUser)));
+      }
+
+      setFetching(false);
+    };
+
+    loadUser();
+  }, []);
+
+  useEffect(() => {
+    fetchManuscriptByStatusAndIsDraft();
+  }, []);
+
   const issueVariants = {
     hidden: { opacity: 0, y: 50 },
     visible: {
@@ -133,57 +220,7 @@ const Journal = () => {
     },
   ];
 
-  const recentlyPublished = [
-    {
-      title: "Am I Ovulating? How to Spot the Signs",
-      date: "May 15, 2021",
-      time: "1 min read",
-    },
-    {
-      title: "A Pandemic Nurse's Love Letter to New York",
-      date: "June 2, 2020",
-      time: "1 min read",
-    },
-    {
-      title: "19 Tips for Fuller, Healthier Hair",
-      date: "May 16, 2020",
-      time: "1 min read",
-    },
-    {
-      title: "Common Vitamins & Supplements You Should Take",
-      date: "April 16, 2020",
-      time: "1 min read",
-    },
-  ];
-
-  const topStories = [
-    {
-      title: "Dog Scooting: What It Means and What to Do",
-      author: "John Doe",
-      date: "April 16, 2020",
-      time: "1 min read",
-      category: "Family Pregnancy",
-      description:
-        "Lorem markdownum transitque nondum, Peliaeque at poterat exegit, urbis quo; tibi. Cursus mecum adit…",
-      img: "https://flexiblog-medical.netlify.app/static/f13c542303e28afe8a0d8d5aed107c61/fc596/image.webp",
-      authorImage:
-        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
-    },
-    {
-      title: "16 Foods Your Dog Should Never Eat",
-      author: "John Doe",
-      date: "April 16, 2020",
-      time: "1 min read",
-      img: "https://flexiblog-medical.netlify.app/static/f13c542303e28afe8a0d8d5aed107c61/fc596/image.webp",
-      category: "Family Pregnancy",
-      description:
-        "Lorem markdownum transitque nondum, Peliaeque at poterat exegit, urbis quo; tibi. Cursus mecum adit…",
-      authorImage:
-        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp",
-    },
-  ];
-
-  const FeaturedCarousel = ({ featuredData }) => {
+  const FeaturedCarousel = () => {
     const buttonVariants = {
       hover: { scale: 1.2, rotate: 15, transition: { duration: 0.3 } },
       tap: { scale: 0.9, rotate: -15, transition: { duration: 0.2 } },
@@ -233,7 +270,7 @@ const Journal = () => {
       <div className="col-lg-8 mb-4">
         <h4 className="mb-3 section-header">Featured this month</h4>
         <Slider {...settings}>
-          {featuredData.map((item, index) => (
+          {manuscriptThisMonth.map((item, index) => (
             <motion.div
               className="carousel-item"
               key={index}
@@ -241,6 +278,7 @@ const Journal = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               variants={imageVariants}
+              onClick={() => goToThisManuscriptDetail(item.id)}
             >
               <div
                 className="card border position-relative"
@@ -250,7 +288,11 @@ const Journal = () => {
                   className="card-img-top position-relative"
                   style={{
                     height: "550px",
-                    backgroundImage: `url(${item.img})`,
+                    backgroundImage: `url(${
+                      item.imagee
+                        ? item.image
+                        : "https://img.freepik.com/free-vector/digital-futuristic-earth-technology-background-with-glowing-lights_1017-23327.jpg?t=st=1735655793~exp=1735659393~hmac=1282ebb05c6e837c8f830796b3ff114d61eeb6a4325d34830d841a0f2585ce7a&w=1800"
+                    })`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                     position: "relative",
@@ -279,11 +321,26 @@ const Journal = () => {
                   className="card-body position-absolute bottom-0 w-100 p-3 carousel-detail-section"
                   style={{
                     zIndex: 3,
+                    marginTop: "10px",
                   }}
                 >
-                  <h5 className="card-title">{item.title}</h5>
-                  <p className="card-text">
-                    {item.date} • {item.time}
+                  <h5 className="card-title" style={{ color: "white" }}>
+                    {item.full_title.replace(/\s+/g, "").length > 51
+                      ? item.full_title.slice(0, 51) + "..."
+                      : item.full_title}
+                  </h5>
+                  <p className="card-text" style={{ color: "white" }}>
+                    {new Date(item.created_at).toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}{" "}
+                    •{" "}
+                    {new Date(item.created_at).toLocaleTimeString("en-GB", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
                   </p>
                   <div
                     style={{
@@ -294,7 +351,10 @@ const Journal = () => {
                     }}
                   >
                     <img
-                      src={item.authorImage}
+                      src={
+                        item.authorImage ||
+                        "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp"
+                      }
                       alt={item.author}
                       style={{
                         width: "50px",
@@ -304,9 +364,11 @@ const Journal = () => {
                       }}
                     />
                     <div>
-                      <div style={{ fontWeight: "700" }}>{item.author}</div>
-                      <span>{item.date}</span>
-                      <span> • {item.time}</span>
+                      <div style={{ fontWeight: "700" }}>
+                        {item.created_by.username}
+                      </div>
+                      <span>{item.created_by.email}</span>
+                      <span></span>
                     </div>
                   </div>
                 </div>
@@ -328,13 +390,14 @@ const Journal = () => {
         <div className="col-lg-4 mb-4">
           <h4 className="mb-3 section-header">Recently Published</h4>
           <ul className="recentlyPublishedContainer list-group flex">
-            {recentlyPublished.map((item, index) => (
+            {latestManuscripts.map((item, index) => (
               <motion.li
                 className="recently-published-item"
                 style={{
                   alignItems: "center",
                   display: "flex",
                 }}
+                onClick={() => goToThisManuscriptDetail(item.id)}
                 key={index}
                 initial={{
                   scale: 1,
@@ -347,12 +410,27 @@ const Journal = () => {
                 }}
               >
                 <div className="p-3" style={{ width: "99%" }}>
-                  <h6 className="mb-1">{item.title}</h6>
+                  <h6 className="mb-1">
+                    {item.full_title.replace(/\s+/g, "").length > 70
+                      ? item.full_title.slice(0, 70) + "..."
+                      : item.full_title}
+                  </h6>
                   <div className="d-flex align-items-center icon-grey recent-published-info">
                     <div className="recent-author-name">John Doe</div>
                     <div className="recentIconSize">
-                      <FaCalendarAlt className="mr-1" /> {item.date} •
-                      <FaClock className="mx-1" /> {item.time}
+                      <FaCalendarAlt className="mr-1" />{" "}
+                      {new Date(item.created_at).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}{" "}
+                      •
+                      <FaClock className="mx-1" />{" "}
+                      {new Date(item.created_at).toLocaleTimeString("en-GB", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: true,
+                      })}
                     </div>
                   </div>
                 </div>
@@ -363,122 +441,8 @@ const Journal = () => {
       </div>
 
       <div className="row">
-        {/* Top Stories */}
         <div className="col-lg-8 mb-4">
-          <h4 className="mb-3 section-header">Top Stories</h4>
-          <motion.div
-            className="row"
-            ref={ref}
-            variants={sectionVariants}
-            initial="hidden"
-            animate={controls}
-          >
-            {topStories.map((story, index) => (
-              <motion.div className="col-md-12 mb-4" key={index}>
-                <motion.div
-                  className="card d-flex flex-row align-items-center"
-                  style={{
-                    borderRadius: "15px",
-                    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                    padding: "10px",
-                    height: "300px",
-                    cursor: "pointer",
-                  }}
-                  whileHover="hover"
-                  variants={cardHoverVariants}
-                >
-                  {/* Image Section */}
-                  <img
-                    src={story.img}
-                    alt={story.title}
-                    style={{
-                      width: "40%",
-                      height: "100%",
-                      objectFit: "cover",
-                      borderRadius: "15px",
-                      marginRight: "15px",
-                    }}
-                  />
-
-                  {/* Text Section */}
-                  <div style={{ flex: 1, padding: "20px" }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        padding: "5px 10px",
-                        backgroundColor: "#f0f4f7",
-                        borderRadius: "20px",
-                        fontSize: "12px",
-                        color: "#007BFF",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {story.category}
-                    </div>
-                    <h5
-                      className="card-title"
-                      style={{
-                        fontSize: "18px",
-                        fontWeight: "bold",
-                        marginBottom: "15px",
-                      }}
-                    >
-                      {story.title}
-                    </h5>
-                    <p
-                      className="card-text"
-                      style={{
-                        fontSize: "14px",
-                        color: "#555",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      {story.description}
-                    </p>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        fontSize: "13px",
-                        color: "#888",
-                      }}
-                    >
-                      <img
-                        src={story.authorImage}
-                        alt={story.author}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          borderRadius: "50%",
-                          marginRight: "10px",
-                        }}
-                      />
-                      <div>
-                        <div style={{ fontWeight: "700" }}>{story.author}</div>
-                        <span>{story.date}</span>
-                        <span> • {story.time}</span>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Publication Info Section */}
-        <div className="col-lg-4 mb-4">
-          <h4 className="mb-3 section-header">Journal Archieve</h4>
-          <div className="card shadow border-0">
-            <div className="card-body">
-              <VolumeList />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="row">
-        <div className="col-lg-8 mb-4">
-          <h4 className="mb-3 section-header">Current Issues</h4>
+          <h4 className="mb-3 section-header">Articles</h4>
           <motion.div
             className="row"
             ref={ref2}
@@ -486,8 +450,12 @@ const Journal = () => {
             initial="hidden"
             animate={controls2}
           >
-            {topStories.map((story, index) => (
-              <motion.div className="col-md-12 mb-4" key={index}>
+            {drafts.map((story, index) => (
+              <motion.div
+                className="col-md-12 mb-4"
+                key={index}
+                onClick={() => goToThisManuscriptDetail(story.id)}
+              >
                 <motion.div
                   className="card d-flex flex-row align-items-center"
                   style={{
@@ -500,7 +468,6 @@ const Journal = () => {
                   whileHover="hover"
                   variants={cardIssueHoverVariants}
                 >
-                  {/* Text Section */}
                   <div style={{ flex: 1, padding: "20px" }}>
                     <div
                       style={{
@@ -513,7 +480,7 @@ const Journal = () => {
                         marginBottom: "10px",
                       }}
                     >
-                      {story.category}
+                      {story.subjects}
                     </div>
                     <h5
                       className="card-title"
@@ -523,7 +490,7 @@ const Journal = () => {
                         marginBottom: "15px",
                       }}
                     >
-                      {story.title}
+                      {story.full_title}
                     </h5>
                     <p
                       className="card-text"
@@ -533,7 +500,11 @@ const Journal = () => {
                         marginBottom: "10px",
                       }}
                     >
-                      {story.description}
+                      {story.running_title}
+                      ilbjzdifailfio dafbuadil fsdlbldifsduhfb dif difubidfikii
+                      dafuhbasid sdaubsd adf iladba sadfub sadj sdubsd
+                      jmsadukbsd asduksd sahdgvsd hydgsd dhyfvbesdf yuskadvf
+                      asdgadkf dafuyvae akfdadfa adufkadf
                     </p>
                     <div
                       style={{
@@ -544,8 +515,10 @@ const Journal = () => {
                       }}
                     >
                       <img
-                        src={story.authorImage}
-                        alt={story.author}
+                        src={
+                          "https://flexiblog-medical.netlify.app/static/18c810c8f231ac22d5ec2cf2819ed68c/a3542/john-doe.webp"
+                        }
+                        alt={story.created_by.email}
                         style={{
                           width: "50px",
                           height: "50px",
@@ -554,9 +527,32 @@ const Journal = () => {
                         }}
                       />
                       <div>
-                        <div style={{ fontWeight: "700" }}>{story.author}</div>
-                        <span>{story.date}</span>
-                        <span> • {story.time}</span>
+                        <div style={{ fontWeight: "700" }}>
+                          {story.created_by.email}
+                        </div>
+                        <span>
+                          {" "}
+                          {new Date(story.created_at).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}{" "}
+                        </span>
+                        <span>
+                          {" "}
+                          •{" "}
+                          {new Date(story.created_at).toLocaleTimeString(
+                            "en-GB",
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            }
+                          )}
+                        </span>
                       </div>
                     </div>
                   </div>
