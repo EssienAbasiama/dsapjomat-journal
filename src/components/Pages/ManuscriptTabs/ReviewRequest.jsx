@@ -378,7 +378,7 @@ const ReviewRequest = ({ darkModeTheme, createdBy, drawerVisible }) => {
 
         if (response.status === 200) {
           console.log(response);
-          setDrafts(response.data.data); // Update state with fetched data
+          setDrafts(response.data.data);
         }
       }
       setFetching(false);
@@ -390,7 +390,7 @@ const ReviewRequest = ({ darkModeTheme, createdBy, drawerVisible }) => {
 
   useEffect(() => {
     fetchReviewRequestManuscript();
-  }, [createdBy, drawerVisible]);
+  }, [createdBy, drawerVisible, fetching, loading]);
 
   useEffect(() => {
     fetchReviewRequestManuscript();
@@ -577,7 +577,7 @@ const ReviewRequest = ({ darkModeTheme, createdBy, drawerVisible }) => {
               border: "1px solid #edf2f7",
             }}
           >
-            {collectedData.status === "pending" && (
+            {collectedData?.status === "pending" && (
               <div
                 style={{
                   display: "flex",

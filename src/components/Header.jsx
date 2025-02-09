@@ -57,6 +57,13 @@ function Header({ show }) {
                   style={{ width: "50px", height: "50px" }}
                 />
               </a>
+              <a className="navbar-brand" href="/">
+                <img
+                  src={logo}
+                  alt="Logo"
+                  style={{ width: "50px", height: "50px" }}
+                />
+              </a>
               <button
                 className="navbar-toggler"
                 type="button"
@@ -91,6 +98,11 @@ function Header({ show }) {
                   <li className="nav-item">
                     <a className="page-scroll" href="/contact-us">
                       Contact
+                    </a>
+                  </li>
+                  <li className="nav-item">
+                    <a className="page-scroll" href="/contact-us">
+                      Conference
                     </a>
                   </li>
                   <li className="nav-item">
@@ -190,6 +202,11 @@ function Header({ show }) {
                           <li>
                             <a className="dropdown-item" href="/terms">
                               Social Science
+                            </a>
+                          </li>
+                          <li>
+                            <a className="dropdown-item" href="/terms">
+                              Management Science
                             </a>
                           </li>
                         </motion.ul>

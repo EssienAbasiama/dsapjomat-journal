@@ -95,8 +95,8 @@ const News = () => {
         formData.created_at || new Date().toISOString()
       );
 
-      console.log("FormData Entries:", Array.from(newsData.entries())); // Debugging
-      console.log("FormData Entries1:", Array.from(newsData)); // Debugging
+      console.log("FormData Entries:", Array.from(newsData.entries()));
+      console.log("FormData Entries1:", Array.from(newsData));
 
       const response = await apiClient.post("/news/news", newsData, {
         headers: {
@@ -108,6 +108,15 @@ const News = () => {
       if (response.status === 201) {
         console.log("News published successfully:", response.data);
         message.success("News published successfully!");
+        setFormData({
+          title: "",
+          image: null,
+          description: "",
+          mainText: "",
+          created_by: "",
+          created_at: "",
+          type: "",
+        });
       }
     } catch (error) {
       console.error(

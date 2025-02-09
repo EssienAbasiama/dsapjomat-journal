@@ -108,7 +108,11 @@ const Journal = () => {
           console.log("Manuscripts This Month:", manuscriptsThisMonth);
           console.log("Latest 4 Manuscripts:", latestFourManuscripts);
 
-          setManuscriptThisMonth(manuscriptsThisMonth); // Set the manuscripts created this month
+          setManuscriptThisMonth(
+            manuscriptsThisMonth.length > 0
+              ? manuscriptsThisMonth
+              : latestFourManuscripts
+          ); // Set the manuscripts created this month
           setLatestManuscripts(latestFourManuscripts);
           setDrafts(manuscripts);
         }
@@ -270,7 +274,7 @@ const Journal = () => {
       <div className="col-lg-8 mb-4">
         <h4 className="mb-3 section-header">Featured this month</h4>
         <Slider {...settings}>
-          {manuscriptThisMonth.map((item, index) => (
+          {manuscriptThisMonth?.map((item, index) => (
             <motion.div
               className="carousel-item"
               key={index}

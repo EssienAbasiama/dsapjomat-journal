@@ -177,7 +177,10 @@ function Signup() {
               <p className="text-body">Create your account</p>
             </div>
 
-            <button className="svg-btn btn btn-block d-flex align-items-center justify-content-center text-dark p-3 rounded border ">
+            <button
+              disabled
+              className="svg-btn btn btn-block d-flex align-items-center justify-content-center text-dark p-3 rounded border "
+            >
               <svg
                 width="23"
                 height="22"
